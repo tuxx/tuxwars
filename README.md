@@ -8,7 +8,7 @@ A fan-inspired arena platformer built with Godot 4. Started for fun; anyone can 
 
 *The current development status screenshot*
 
-- *Tux*: Player charactee
+- *Tux*: Player character
 - *FreeBSD Beastie*: NPC
 - *Level*: Ugly test level
 
