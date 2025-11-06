@@ -3,7 +3,8 @@ Super Mario Wars clone in godot 4
 
 ---
 
-<img width="1277" height="720" alt="2025-11-05_23-52-38" src="https://github.com/user-attachments/assets/f3002339-50e3-42fe-ace2-61213e6f8452" />
+<img width="1274" height="721" alt="2025-11-06_01-15-19" src="https://github.com/user-attachments/assets/092aad98-e81c-459b-aa59-901f3e9ea922" />
+
 
 *The current development status screenshot*
 
@@ -14,6 +15,12 @@ Super Mario Wars clone in godot 4
 ---
 
 # TODO
+
+**General**
+- Main README
+    - How to run in godot
+    - What this project's goals are
+    - Contributing docs
 
 **Physics**
 
@@ -37,7 +44,6 @@ Super Mario Wars clone in godot 4
     - [ ]  Jump
     - [ ]  Fall
 - Other characters.
-
 
 **Levels**
 
