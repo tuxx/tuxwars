@@ -8,6 +8,12 @@ extends CharacterBody2D
 @export var character_color: Color = Color.WHITE
 @export var max_fall_speed: float = 1000.0
 
+# Jump feel tuning
+@export var fall_multiplier: float = 2.0			# Faster falls feel snappier
+@export var low_jump_multiplier: float = 3.0		# Cutting jump early increases gravity
+@export var coyote_time: float = 0.1				# Grace time after leaving ground to still jump
+@export var jump_buffer_time: float = 0.1			# Buffer jump input slightly before landing
+
 # Respawn properties
 var is_despawned: bool = false
 var spawn_position: Vector2
@@ -16,6 +22,11 @@ const RESPAWN_TIME: float = 2.0
 
 # Animation
 var animated_sprite: AnimatedSprite2D
+
+# Timers/state for jump assist
+var time_since_left_floor: float = 0.0
+var jump_buffer_timer: float = 0.0
+var was_on_floor: bool = false
 
 func _ready():
 	# Store initial spawn position
@@ -40,10 +51,24 @@ func _physics_process(delta: float) -> void:
 	# Handle input for player characters
 	if is_player:
 		_handle_input()
+
+	# Update grounded state timers for coyote time
+	if is_on_floor():
+		time_since_left_floor = 0.0
+	else:
+		time_since_left_floor += delta
+
+	# Decrease jump buffer timer
+	if jump_buffer_timer > 0.0:
+		jump_buffer_timer = max(0.0, jump_buffer_timer - delta)
 	
 	# Apply gravity
 	_apply_gravity(delta)
 	
+	# Handle buffered/coyote jump resolution after gravity application
+	if _should_jump():
+		_perform_jump()
+
 	# Cap velocity to prevent infinite acceleration
 	velocity.y = clamp(velocity.y, -max_fall_speed, max_fall_speed)
 	velocity.x = clamp(velocity.x, -move_speed * 2, move_speed * 2)
@@ -51,6 +76,12 @@ func _physics_process(delta: float) -> void:
 	# Move and handle collisions
 	var previous_velocity_y = velocity.y
 	move_and_slide()
+
+	# Detect landing to consume buffered jump if still pending
+	if is_on_floor() and not was_on_floor and jump_buffer_timer > 0.0:
+		_perform_jump()
+
+	was_on_floor = is_on_floor()
 	
 	# Update animations
 	_update_animation()
@@ -64,14 +95,35 @@ func _handle_input() -> void:
 	var input_direction = Input.get_axis("move_left", "move_right")
 	velocity.x = input_direction * move_speed
 	
-	# Jump input
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = jump_velocity
+	# Jump input buffering
+	if Input.is_action_just_pressed("jump"):
+		jump_buffer_timer = jump_buffer_time
 
 func _apply_gravity(delta: float) -> void:
-	# Apply gravity if not on floor
-	if not is_on_floor():
-		velocity.y += gravity * delta
+	# Apply gravity with fall/low-jump multipliers for better feel
+	if is_on_floor():
+		return
+	
+	var g := gravity
+	if velocity.y > 0.0:
+		# Falling: make it faster/snappier
+		g *= fall_multiplier
+	elif velocity.y < 0.0 and not Input.is_action_pressed("jump"):
+		# Rising but jump released early: cut the jump by increasing gravity
+		g *= low_jump_multiplier
+	
+	velocity.y += g * delta
+
+func _should_jump() -> bool:
+	# Can jump if on floor or within coyote time window, and we have a buffered press
+	var can_coyote_jump := (is_on_floor() or time_since_left_floor <= coyote_time)
+	return can_coyote_jump and jump_buffer_timer > 0.0
+
+func _perform_jump() -> void:
+	velocity.y = jump_velocity
+	jump_buffer_timer = 0.0
+	# Reset coyote after consuming jump
+	time_since_left_floor = coyote_time + 1.0
 
 func _update_animation() -> void:
 	if not animated_sprite:
@@ -126,6 +178,9 @@ func _respawn() -> void:
 	# Reset position
 	global_position = spawn_position
 	velocity = Vector2.ZERO
+	was_on_floor = true
+	jump_buffer_timer = 0.0
+	time_since_left_floor = 0.0
 	
 	# Show the character
 	visible = true
