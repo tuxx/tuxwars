@@ -17,6 +17,7 @@ extends CharacterBody2D
 @export var apex_threshold_speed: float = 40.0	# |vy| below this is considered near apex
 @export var air_control_multiplier: float = 0.85	# Slightly reduce horizontal control while airborne
 @export var apex_horizontal_bonus: float = 1.15	# Small horizontal speed bonus at apex
+@export var death_hold_before_respawn: float = 0.2	# Hold last death frame before respawn
 
 # Respawn properties
 var is_despawned: bool = false
@@ -26,12 +27,15 @@ const RESPAWN_TIME: float = 2.0
 
 # Animation
 var animated_sprite: AnimatedSprite2D
+var shape_alive: CollisionShape2D
+var shape_dead: CollisionShape2D
 
 # Timers/state for jump assist
 var time_since_left_floor: float = 0.0
 var jump_buffer_timer: float = 0.0
 var was_on_floor: bool = false
 var anchor_x: float = NAN
+var death_anim_active: bool = false
 
 func _ready():
 	# Store initial spawn position
@@ -39,6 +43,17 @@ func _ready():
 	
 	# Get animated sprite reference
 	animated_sprite = get_node_or_null("AnimatedSprite2D")
+	shape_alive = get_node_or_null("CollisionShape2D") as CollisionShape2D
+	shape_dead = get_node_or_null("CollisionShape2D_Dead") as CollisionShape2D
+	# Ensure correct initial shape state
+	if shape_alive:
+		shape_alive.disabled = false
+	if shape_dead:
+		shape_dead.disabled = true
+
+	# Register player in group for dev tools and gameplay systems
+	if is_player:
+		add_to_group("players")
 	
 	# Apply character color to visual representation if ColorRect exists
 	var color_rect = get_node_or_null("ColorRect")
@@ -56,6 +71,20 @@ func _physics_process(delta: float) -> void:
 	# Handle respawn timer
 	if is_despawned:
 		respawn_timer += delta
+		# If we're playing a death animation, allow physics so the body falls to the floor
+		if death_anim_active:
+			# Simple gravity while dead (no jump modifiers)
+			velocity.x = 0.0
+			velocity.y = clamp(velocity.y + gravity * delta, -max_fall_speed, max_fall_speed)
+			move_and_slide()
+			# Ensure last frame is shown shortly before respawn
+			if animated_sprite and animated_sprite.sprite_frames and animated_sprite.animation == "death":
+				if respawn_timer >= (RESPAWN_TIME - death_hold_before_respawn):
+					var frames: SpriteFrames = animated_sprite.sprite_frames
+					var last_idx: int = max(0, frames.get_frame_count("death") - 1)
+					animated_sprite.stop()
+					animated_sprite.animation = "death"
+					animated_sprite.frame = last_idx
 		if respawn_timer >= RESPAWN_TIME:
 			_respawn()
 		return
@@ -112,7 +141,7 @@ func _physics_process(delta: float) -> void:
 func _handle_input() -> void:
 	# Horizontal movement input
 	var input_direction = Input.get_axis("move_left", "move_right")
-	var horizontal_speed := move_speed
+	var horizontal_speed: float = move_speed
 	if not is_on_floor():
 		# Slight midair control dampening
 		horizontal_speed *= air_control_multiplier
@@ -130,7 +159,7 @@ func _apply_gravity(delta: float) -> void:
 	if is_on_floor():
 		return
 	
-	var g := gravity
+	var g: float = gravity
 	if velocity.y > 0.0:
 		# Falling: make it faster/snappier
 		g *= fall_multiplier
@@ -149,7 +178,7 @@ func _is_near_apex() -> bool:
 
 func _should_jump() -> bool:
 	# Can jump if on floor or within coyote time window, and we have a buffered press
-	var can_coyote_jump := (is_on_floor() or time_since_left_floor <= coyote_time)
+	var can_coyote_jump: bool = (is_on_floor() or time_since_left_floor <= coyote_time)
 	return can_coyote_jump and jump_buffer_timer > 0.0
 
 func _perform_jump() -> void:
@@ -184,9 +213,12 @@ func _check_head_stomp() -> void:
 		
 		# Only stomp characters when contacting their top surface (avoid side/bottom kills)
 		if collider is CharacterBody2D and collider != self and collider.has_method("despawn"):
+			# Ignore already-despawned targets
+			if collider.has_method("get") and collider.get("is_despawned") == true:
+				continue
 			var normal: Vector2 = collision.get_normal()
 			# Upward normal means we hit their top. Threshold tolerates slopes/rounded shapes.
-			var hit_top := normal.y < -0.6
+			var hit_top: bool = normal.y < -0.6
 			if hit_top:
 				collider.despawn()
 				# Bounce the stomper back up for game feel
@@ -200,21 +232,38 @@ func despawn() -> void:
 	respawn_timer = 0.0
 	velocity = Vector2.ZERO
 	
-	# Play death animation for player if available; keep visible to show it
-	if is_player and animated_sprite:
-		var frames := animated_sprite.sprite_frames
-		if frames and frames.has_animation("death"):
-			# Ensure death does not loop so it stops on the last frame
-			frames.set_animation_loop("death", false)
-			animated_sprite.play("death")
+	var has_death_anim: bool = false
+	if animated_sprite:
+		var frames: SpriteFrames = animated_sprite.sprite_frames
+		has_death_anim = frames != null and frames.has_animation("death")
 	
-	# Disable collision
-	set_collision_layer_value(1, false)
-	set_collision_mask_value(1, false)
+	if has_death_anim:
+		# Play death animation and allow body to fall under gravity
+		animated_sprite.sprite_frames.set_animation_loop("death", false)
+		animated_sprite.play("death")
+		death_anim_active = true
+		# Keep collisions enabled so we can land on the floor
+		# Switch to smaller dead collision shape if available (player only)
+		if is_player:
+			if shape_alive:
+				shape_alive.disabled = true
+			if shape_dead:
+				shape_dead.disabled = false
+	else:
+		# No death animation: hide immediately and disable collisions
+		visible = false
+		set_collision_layer_value(1, false)
+		set_collision_mask_value(1, false)
+		# Ensure no collision shapes remain active
+		if shape_alive:
+			shape_alive.disabled = true
+		if shape_dead:
+			shape_dead.disabled = true
 
 func _respawn() -> void:
 	is_despawned = false
 	respawn_timer = 0.0
+	death_anim_active = false
 	
 	# Reset position
 	global_position = spawn_position
@@ -223,6 +272,11 @@ func _respawn() -> void:
 	jump_buffer_timer = 0.0
 	time_since_left_floor = 0.0
 	_face_towards_screen_center()
+	# Restore alive collision shape
+	if shape_alive:
+		shape_alive.disabled = false
+	if shape_dead:
+		shape_dead.disabled = true
 	
 	# Show the character
 	visible = true
@@ -234,7 +288,7 @@ func _respawn() -> void:
 func _face_towards_screen_center() -> void:
 	if not animated_sprite:
 		return
-	var center_x := get_viewport().get_visible_rect().size.x * 0.5
+	var center_x: float = get_viewport().get_visible_rect().size.x * 0.5
 	# If positioned left of center, face right (no flip). If right of center, face left (flip).
 	if global_position.x < center_x:
 		animated_sprite.flip_h = false

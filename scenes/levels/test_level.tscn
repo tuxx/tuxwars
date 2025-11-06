@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://gtqo8ylakt4s"]
+[gd_scene load_steps=7 format=3 uid="uid://gtqo8ylakt4s"]
 
 [ext_resource type="Script" uid="uid://x5eq3isnjapn" path="res://scripts/boundary_wrapper.gd" id="1_boundary"]
 [ext_resource type="PackedScene" uid="uid://c4dwbqdkxmm42" path="res://scenes/characters/player_character.tscn" id="2_player"]
 [ext_resource type="PackedScene" uid="uid://o0yj30qpa4ym" path="res://scenes/characters/npc_character.tscn" id="3_npc"]
+[ext_resource type="Script" uid="uid://bi6lx7ircvkf" path="res://scripts/dev_menu.gd" id="4_devmenu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1163, 100)
@@ -94,6 +95,11 @@ offset_right = 50.0
 offset_bottom = 10.0
 color = Color(0.6, 0.8, 0.4, 1)
 metadata/_edit_use_anchors_ = true
+
+[node name="DevMenu" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("4_devmenu")
 
 [node name="PlayerCharacter" parent="." instance=ExtResource("2_player")]
 position = Vector2(200, 500)

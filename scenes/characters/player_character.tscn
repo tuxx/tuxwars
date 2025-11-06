@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://c4dwbqdkxmm42"]
+[gd_scene load_steps=18 format=3 uid="uid://c4dwbqdkxmm42"]
 
 [ext_resource type="Script" uid="uid://de6d7kdce320s" path="res://scripts/character_controller.gd" id="1_character_script"]
 [ext_resource type="Texture2D" uid="uid://c1eptb7qe7lh1" path="res://assets/characters/tux/spritesheets/death.png" id="2_ar13e"]
@@ -7,6 +7,9 @@
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(82, 121)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dead"]
+size = Vector2(88, 16)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h7c8y"]
 atlas = ExtResource("2_ar13e")
@@ -106,10 +109,15 @@ position = Vector2(-3, 0.5)
 scale = Vector2(0.5, 0.5)
 shape = SubResource("RectangleShape2D_1")
 
+[node name="CollisionShape2D_Dead" type="CollisionShape2D" parent="."]
+position = Vector2(-1, 27)
+scale = Vector2(0.5, 0.5)
+shape = SubResource("RectangleShape2D_dead")
+disabled = true
+
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_1")
 animation = &"death"
 autoplay = "idle"
-frame = 1
-frame_progress = 0.4838685
+frame_progress = 0.6044576
