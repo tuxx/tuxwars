@@ -13,6 +13,10 @@ extends CharacterBody2D
 @export var low_jump_multiplier: float = 3.0		# Cutting jump early increases gravity
 @export var coyote_time: float = 0.1				# Grace time after leaving ground to still jump
 @export var jump_buffer_time: float = 0.1			# Buffer jump input slightly before landing
+@export var apex_gravity_scale: float = 0.6		# Reduce gravity near apex to add slight "hang"
+@export var apex_threshold_speed: float = 40.0	# |vy| below this is considered near apex
+@export var air_control_multiplier: float = 0.85	# Slightly reduce horizontal control while airborne
+@export var apex_horizontal_bonus: float = 1.15	# Small horizontal speed bonus at apex
 
 # Respawn properties
 var is_despawned: bool = false
@@ -108,7 +112,14 @@ func _physics_process(delta: float) -> void:
 func _handle_input() -> void:
 	# Horizontal movement input
 	var input_direction = Input.get_axis("move_left", "move_right")
-	velocity.x = input_direction * move_speed
+	var horizontal_speed := move_speed
+	if not is_on_floor():
+		# Slight midair control dampening
+		horizontal_speed *= air_control_multiplier
+		# Small apex bonus to help clear gaps
+		if _is_near_apex():
+			horizontal_speed *= apex_horizontal_bonus
+	velocity.x = input_direction * horizontal_speed
 	
 	# Jump input buffering
 	if Input.is_action_just_pressed("jump"):
@@ -127,7 +138,14 @@ func _apply_gravity(delta: float) -> void:
 		# Rising but jump released early: cut the jump by increasing gravity
 		g *= low_jump_multiplier
 	
+	# Add a slight hang near the jump apex to feel more controllable
+	if _is_near_apex():
+		g *= apex_gravity_scale
+	
 	velocity.y += g * delta
+
+func _is_near_apex() -> bool:
+	return (not is_on_floor()) and abs(velocity.y) <= apex_threshold_speed
 
 func _should_jump() -> bool:
 	# Can jump if on floor or within coyote time window, and we have a buffered press
