@@ -182,12 +182,14 @@ func _check_head_stomp() -> void:
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		
-		# Check if collider is a CharacterBody2D with the character_controller script
-		if collider is CharacterBody2D and collider.has_method("despawn"):
-			# Check if we're above the other character (stomping on head)
-			if global_position.y < collider.global_position.y:
+		# Only stomp characters when contacting their top surface (avoid side/bottom kills)
+		if collider is CharacterBody2D and collider != self and collider.has_method("despawn"):
+			var normal: Vector2 = collision.get_normal()
+			# Upward normal means we hit their top. Threshold tolerates slopes/rounded shapes.
+			var hit_top := normal.y < -0.6
+			if hit_top:
 				collider.despawn()
-				# Bounce the stomper
+				# Bounce the stomper back up for game feel
 				velocity.y = jump_velocity * 0.5
 
 func despawn() -> void:
@@ -196,9 +198,15 @@ func despawn() -> void:
 	
 	is_despawned = true
 	respawn_timer = 0.0
+	velocity = Vector2.ZERO
 	
-	# Hide the character
-	visible = false
+	# Play death animation for player if available; keep visible to show it
+	if is_player and animated_sprite:
+		var frames := animated_sprite.sprite_frames
+		if frames and frames.has_animation("death"):
+			# Ensure death does not loop so it stops on the last frame
+			frames.set_animation_loop("death", false)
+			animated_sprite.play("death")
 	
 	# Disable collision
 	set_collision_layer_value(1, false)
