@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c8ut8nmdaudpq"
-path="res://.godot/imported/beasty-idle-128x128.png-5b898795750c18fb84507598201b6eea.ctex"
+uid="uid://wlqfkag3fl80"
+path="res://.godot/imported/base-16x16.png-9173a0b9b1a478918dedad21e5379713.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/beasty-idle-128x128.png"
-dest_files=["res://.godot/imported/beasty-idle-128x128.png-5b898795750c18fb84507598201b6eea.ctex"]
+source_file="res://assets/characters/tux/base-16x16.png"
+dest_files=["res://.godot/imported/base-16x16.png-9173a0b9b1a478918dedad21e5379713.ctex"]
 
 [params]
 
