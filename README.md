@@ -30,11 +30,10 @@ A fan-inspired arena platformer built with Godot 4. Started for fun; anyone can 
 
 We will first focus on core gameplay foundations: characters, items, levels, and multiplayer. Game modes come later.
 
-### Legal
-- We do not use actual third‑party logos. Characters and items are original, non‑confusing stylizations to avoid trademark infringement and usage restrictions.
-- No Nintendo IP.
-- Attributions are included in-source and/or in-game where required (e.g., if any artwork derives from assets that require attribution). If you contribute assets needing attribution, include the attribution text in your PR.
-- By contributing, you agree your code and assets are licensed under MIT for this project.
+### Roadmap
+- **Short term**: refine movement/jumping; add jump/fall animations; basic items; level builder with tilesets and tilemaps; local multiplayer.
+- **Mid term**: P2P networking; more characters and items; network polish; exports for Linux/Windows.
+- **Long term**: dedicated servers; game modes; maybe macOS/mobile.
 
 ### Running the game
 - Godot version: 4.5.1-stable
@@ -77,11 +76,13 @@ We will first focus on core gameplay foundations: characters, items, levels, and
 - License: MIT (code and assets). By contributing, you agree to license your contributions under MIT.
 - Local testing: run with Godot 4.5.1 (see above).
 
-### Roadmap
-- **Short term**: refine movement/jumping; add jump/fall animations; basic items; level builder with tilesets and tilemaps; local multiplayer.
-- **Mid term**: P2P networking; more characters and items; network polish; exports for Linux/Windows.
-- **Long term**: dedicated servers; game modes; maybe macOS/mobile.
 
 ### Acknowledgements
 - Inspired by community-made arena platformers like Super Mario Wars.
 - Thanks to all open-source contributors and tool authors (Godot, LibreSprite, etc.).
+
+### Legal
+- We do not use actual third‑party logos. Characters and items are original, non‑confusing stylizations to avoid trademark infringement and usage restrictions.
+- No Nintendo IP.
+- Attributions are included in-source and/or in-game where required (e.g., if any artwork derives from assets that require attribution). If you contribute assets needing attribution, include the attribution text in your PR.
+- By contributing, you agree your code and assets are licensed under MIT for this project.
