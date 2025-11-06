@@ -1,4 +1,4 @@
-# Super Tux Wars
+# Super Tux War
 A fan-inspired arena platformer built with Godot 4, following Super Mario War conventions. Battle in fast-paced multiplayer arenas where the goal is simple: stomp your opponents by landing on their heads while avoiding getting stomped yourself. Navigate 32×32 tile-based levels with precise platforming controls, one-way platforms, and hazards.
 
 ---
@@ -155,7 +155,7 @@ We will first focus on core gameplay foundations: characters, items, levels, and
 
 
 ### Acknowledgements
-- Inspired by community-made arena platformers like Super Mario Wars.
+- Inspired by community-made arena platformers like Super Mario War.
 - Thanks to all open-source contributors and tool authors (Godot, LibreSprite, etc.).
 
 ### Legal
