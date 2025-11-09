@@ -18,6 +18,9 @@ The navigation graph is an AI pathfinding system that analyzes your level's tile
 
 ## How It Works
 
+<img width="1215" height="643" src="https://github.com/user-attachments/assets/3cd3d221-01a5-45e2-ae2f-ba6e5bad45ac" />
+
+
 ### Graph Building Process
 
 When a level loads, the navigation system:
@@ -168,6 +171,9 @@ Node2
 ```
 
 ### Jump Arc Simulation
+
+<img width="1215" height="636" src="https://github.com/user-attachments/assets/72ef6dfe-b375-4c3d-8b7d-4786632d63b6" />
+
 
 The system solves jump arcs using real game physics:
 
