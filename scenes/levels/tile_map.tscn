@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=4 uid="uid://brgkt17ijgavn"]
+[gd_scene load_steps=5 format=4 uid="uid://brgkt17ijgavn"]
 
 [ext_resource type="TileSet" uid="uid://bd71pjju517dp" path="res://assets/tilesets/smw_blocks.tres" id="1_tileset"]
 [ext_resource type="Script" uid="uid://b0h4fj6ipj5ur" path="res://scripts/level_navigation.gd" id="2_level_navigation"]
 [ext_resource type="PackedScene" path="res://scenes/objects/spawn_point.tscn" id="4_5oppj"]
-[ext_resource type="Script" uid="uid://cuuu6bjbjpxpt" path="res://scripts/pause_manager.gd" id="8_pause_manager"]
 [ext_resource type="Script" uid="uid://by6omvr8nj0ce" path="res://scripts/spawn_manager.gd" id="9_spawn_manager"]
 
 [node name="TileMapLevel" type="Node2D"]
@@ -20,6 +19,8 @@ tile_set = ExtResource("1_tileset")
 [node name="SemisolidTileMap" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AAAKABIAAgAAAAAAAAALABIAAgAAAAAAAAAMABIAAgAAAAAAAAANABIAAgAAAAAAAAAQABIAAgAAAAAAAAARABIAAgAAAAAAAAASABIAAgAAAAAAAAAdABMAAgAAAAAAAAAeABMAAgAAAAAAAAAfABMAAgAAAAAAAAAiABIAAgAAAAAAAAAkABAAAgAAAAAAAAAmAA4AAgAAAAAAAAAFAAgAAgAAAAAAAAAEAAgAAgAAAAAAAAADAAgAAgAAAAAAAAACAAgAAgAAAAAAAAAVAAUAAgAAAAAAAAAWAAUAAgAAAAAAAAAXAAUAAgAAAAAAAAAYAAUAAgAAAAAAAAAdAAUAAgAAAAAAAAAeAAUAAgAAAAAAAAAfAAUAAgAAAAAAAAAgAAUAAgAAAAAAAAAbAAwAAgAAAAAAAAAcAAwAAgAAAAAAAAAdAAwAAgAAAAAAAAAeAAwAAgAAAAAAAAAgAAkAAgAAAAAAAAAhAAkAAgAAAAAAAAAiAAkAAgAAAAAAAAAjAAkAAgAAAAAAAAAgAA4AAgAAAAAAAAAhAA4AAgAAAAAAAAAiAA4AAgAAAAAAAAAaAAcAAgAAAAAAAAAbAAcAAgAAAAAAAAAcAAcAAgAAAAAAAAATAAwAAgAAAAAAAAASAAwAAgAAAAAAAAARAAwAAgAAAAAAAAATAAkAAgAAAAAAAAASAAkAAgAAAAAAAAARAAkAAgAAAAAAAAANAAYAAgAAAAAAAAAOAAYAAgAAAAAAAAAPAAYAAgAAAAAAAAAQAAYAAgAAAAAAAAAMAAkAAgAAAAAAAAALAAkAAgAAAAAAAAAKAAkAAgAAAAAAAAAJAAkAAgAAAAAAAAAIAAwAAgAAAAAAAAAHAAwAAgAAAAAAAAAGAAwAAgAAAAAAAAAFAAwAAgAAAAAAAAAWAAoAAgAAAAAAAAAXAAoAAgAAAAAAAAAYAAoAAgAAAAAAAAABAA4AAgAAAAAAAAADABAAAgAAAAAAAAAFABIAAgAAAAAAAAAHABMAAgAAAAAAAAAIABMAAgAAAAAAAAAJABMAAgAAAAAAAAAcABIAAgAAAAAAAAAbABIAAgAAAAAAAAAaABIAAgAAAAAAAAAZABIAAgAAAAAAAAAWABIAAgAAAAAAAAAVABIAAgAAAAAAAAAUABIAAgAAAAAAAAATABIAAgAAAAAAAAA=")
 tile_set = ExtResource("1_tileset")
+
+[node name="HUD" type="CanvasLayer" parent="."]
 
 [node name="SpawnManager" type="Node" parent="."]
 script = ExtResource("9_spawn_manager")
@@ -47,9 +48,3 @@ position = Vector2(933, 345)
 
 [node name="SpawnPoint8" parent="SpawnManager" instance=ExtResource("4_5oppj")]
 position = Vector2(736, 127)
-
-
-[node name="HUD" type="CanvasLayer" parent="."]
-
-[node name="PauseManager" type="Node" parent="."]
-script = ExtResource("8_pause_manager")

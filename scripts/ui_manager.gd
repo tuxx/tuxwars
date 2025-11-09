@@ -2,8 +2,10 @@ extends Node
 
 const SCORE_COUNTER_SCENE := preload("res://scenes/ui/score_counter.tscn")
 const DEV_MENU_SCENE := preload("res://scenes/ui/dev_menu.tscn")
+const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
 
 var _last_scene: Node = null
+var _pause_menu: Control = null
 
 func _ready() -> void:
 	# Ensure we run even when paused and across scenes
@@ -16,6 +18,14 @@ func _process(_delta: float) -> void:
 		_last_scene = cs
 		_ensure_hud(cs)
 		_ensure_dev_menu(cs)
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key_event := event as InputEventKey
+		if key_event.keycode == KEY_ESCAPE:
+			_toggle_pause()
+			get_viewport().set_input_as_handled()
 
 
 func _ensure_hud(root: Node) -> void:
@@ -47,5 +57,30 @@ func _ensure_dev_menu(root: Node) -> void:
 	var dev := DEV_MENU_SCENE.instantiate()
 	dev.name = "DevMenu"
 	root.add_child(dev)
+
+
+func _ensure_pause_menu() -> void:
+	if is_instance_valid(_pause_menu):
+		return
+	var instance := PAUSE_MENU_SCENE.instantiate()
+	var root := get_tree().current_scene
+	var hud := root.get_node_or_null("HUD") if root else null
+	if hud:
+		hud.add_child(instance)
+	else:
+		root.add_child(instance)
+	_pause_menu = instance as Control
+
+
+func _toggle_pause() -> void:
+	if get_tree().paused:
+		get_tree().paused = false
+		if is_instance_valid(_pause_menu):
+			_pause_menu.visible = false
+	else:
+		_ensure_pause_menu()
+		if is_instance_valid(_pause_menu):
+			_pause_menu.visible = true
+		get_tree().paused = true
 
 
