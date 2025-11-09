@@ -266,21 +266,31 @@ func _populate_levels() -> void:
 			dir.list_dir_end()
 		_log("DirAccess iteration -> %d entries" % files.size())
 	
-	files.sort()
-	for file_name in files:
-		var lower := String(file_name).to_lower()
-		if not lower.ends_with(".tscn"):
-			continue
-		if not lower.begins_with("level"):
-			continue
-		var level_path := dir_path + "/" + file_name
-		var exists := ResourceLoader.exists(level_path)
-		if not exists:
-			var test := load(level_path)
-			if test != null:
-				exists = true
-		if exists:
-			_level_paths.append(level_path)
+	# For web builds or if directory listing failed, probe for known levels
+	if files.is_empty():
+		_log("Directory listing empty, probing for levels...")
+		for n in range(1, 21):  # Check level01 through level20
+			var candidate_path := "%s/level%02d.tscn" % [dir_path, n]
+			if ResourceLoader.exists(candidate_path):
+				_level_paths.append(candidate_path)
+				_log("Found level: %s" % candidate_path)
+	else:
+		# Process files from directory listing
+		files.sort()
+		for file_name in files:
+			var lower := String(file_name).to_lower()
+			if not lower.ends_with(".tscn"):
+				continue
+			if not lower.begins_with("level"):
+				continue
+			var level_path := dir_path + "/" + file_name
+			var exists := ResourceLoader.exists(level_path)
+			if not exists:
+				var test := load(level_path)
+				if test != null:
+					exists = true
+			if exists:
+				_level_paths.append(level_path)
 	
 	_log("Found %d actual level(s)" % _level_paths.size())
 	
