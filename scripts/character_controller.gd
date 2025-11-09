@@ -59,6 +59,9 @@ func _ready():
 	if is_player:
 		add_to_group("players")
 	
+	# Ensure characters render above temporary objects like gravestones
+	z_index = 10
+	
 	# Apply character color to visual representation if ColorRect exists
 	var color_rect = get_node_or_null("ColorRect")
 	if color_rect:
@@ -306,6 +309,9 @@ func _respawn() -> void:
 	spawn_protection_timer = SPAWN_PROTECTION_DURATION
 	
 	# Reset position
+	var spawn_manager := get_tree().get_first_node_in_group("spawn_manager")
+	if spawn_manager and spawn_manager.has_method("get_spawn_position_for"):
+		spawn_position = spawn_manager.get_spawn_position_for(self)
 	global_position = spawn_position
 	velocity = Vector2.ZERO
 	_face_towards_screen_center()

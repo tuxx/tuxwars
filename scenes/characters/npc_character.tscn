@@ -65,6 +65,7 @@ animations = [{
 
 [node name="NPCCharacter" type="CharacterBody2D"]
 script = ExtResource("1_character_script")
+z_index = 10
 character_color = Color(1, 0, 0, 1)
 character_asset_name = "beasty"
 collision_layer = 2
