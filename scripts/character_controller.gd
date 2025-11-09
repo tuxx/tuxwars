@@ -26,6 +26,13 @@ var spawn_position: Vector2
 var respawn_timer: float = 0.0
 const RESPAWN_TIME: float = 2.0
 
+# Spawn animation properties
+const SPAWN_FADE_DURATION: float = 0.8
+const SPAWN_INITIAL_ALPHA: float = 0.0
+const SPAWN_SCALE_START: float = 0.3
+const SPAWN_SCALE_BOUNCE: float = 1.2
+var spawn_animation_timer: float = 0.0
+
 # Animation
 var animated_sprite: AnimatedSprite2D
 var shape_alive: CollisionShape2D
@@ -41,7 +48,7 @@ var ai_jump_pressed: bool = false
 var ai_jump_released: bool = false
 var ai_drop_pressed: bool = false
 var spawn_protection_timer: float = 0.0
-const SPAWN_PROTECTION_DURATION: float = 0.1
+const SPAWN_PROTECTION_DURATION: float = 1.0
 
 func _ready():
 	# Store initial spawn position
@@ -66,6 +73,10 @@ func _ready():
 	var color_rect = get_node_or_null("ColorRect")
 	if color_rect:
 		color_rect.color = character_color
+	
+	# Ensure normal appearance at start (no spawn effects)
+	modulate = Color(1, 1, 1, 1)
+	scale = Vector2.ONE
 
 	# Set initial facing toward screen center
 	_face_towards_screen_center()
@@ -101,6 +112,15 @@ func _physics_process(delta: float) -> void:
 		# Restore normal character collisions
 		set_collision_layer_value(2, true)
 		set_collision_mask_value(2, true)
+	
+	# Handle spawn animation effects
+	if spawn_animation_timer > 0.0:
+		_update_spawn_animation()
+		spawn_animation_timer = max(0.0, spawn_animation_timer - delta)
+	elif spawn_animation_timer <= 0.0 and (modulate.a < 1.0 or scale != Vector2.ONE):
+		# Ensure we're fully visible and at normal scale after animation completes
+		modulate = Color(1, 1, 1, 1)
+		scale = Vector2.ONE
 	
 	# Handle input for player or AI
 	if is_player:
@@ -327,6 +347,7 @@ func _respawn() -> void:
 	is_despawned = false
 	respawn_timer = 0.0
 	spawn_protection_timer = SPAWN_PROTECTION_DURATION
+	spawn_animation_timer = SPAWN_FADE_DURATION
 	
 	# Reset position
 	var spawn_manager := get_tree().get_first_node_in_group("spawn_manager")
@@ -342,11 +363,52 @@ func _respawn() -> void:
 	# Show the character
 	visible = true
 	
+	# Initialize spawn visual effects
+	# Start with bright white flash, invisible, and small scale
+	modulate = Color(5.0, 5.0, 5.0, SPAWN_INITIAL_ALPHA)  # Bright white flash
+	scale = Vector2(SPAWN_SCALE_START, SPAWN_SCALE_START)
+	
 	# Enable collision
 	set_collision_mask_value(1, true)
 	# Start with character layer/mask disabled; will be restored after protection
 	set_collision_layer_value(2, false)
 	set_collision_mask_value(2, false)
+
+func _update_spawn_animation() -> void:
+	# Calculate progress (0.0 = just spawned, 1.0 = animation complete)
+	var progress: float = 1.0 - (spawn_animation_timer / SPAWN_FADE_DURATION)
+	
+	# Fade in alpha from invisible to fully visible
+	var target_alpha: float = lerp(SPAWN_INITIAL_ALPHA, 1.0, progress)
+	
+	# Bright white flash fades quickly (back to normal color)
+	var flash_progress: float = min(progress * 4.0, 1.0)  # Flash fades 4x faster
+	var color_value: float = lerp(5.0, 1.0, flash_progress)
+	
+	# Scale with bounce effect using custom easing
+	var scale_value: float
+	if progress < 0.6:
+		# Grow from small to slightly larger than normal (bounce up)
+		var grow_progress := progress / 0.6
+		scale_value = lerp(SPAWN_SCALE_START, SPAWN_SCALE_BOUNCE, _ease_out_back(grow_progress))
+	else:
+		# Settle back to normal size (bounce down)
+		var settle_progress := (progress - 0.6) / 0.4
+		scale_value = lerp(SPAWN_SCALE_BOUNCE, 1.0, _ease_out_quad(settle_progress))
+	
+	# Apply the visual effects
+	modulate = Color(color_value, color_value, color_value, target_alpha)
+	scale = Vector2(scale_value, scale_value)
+
+func _ease_out_back(t: float) -> float:
+	# Back easing for overshoot effect
+	var c1 := 1.70158
+	var c3 := c1 + 1.0
+	return 1.0 + c3 * pow(t - 1.0, 3.0) + c1 * pow(t - 1.0, 2.0)
+
+func _ease_out_quad(t: float) -> float:
+	# Quadratic ease out for smooth settling
+	return 1.0 - (1.0 - t) * (1.0 - t)
 
 func _face_towards_screen_center() -> void:
 	if not animated_sprite:
