@@ -2,6 +2,7 @@ extends Control
 class_name ScoreCounter
 
 const SCORE_ENTRY_SCENE := preload("res://scenes/ui/score_entry.tscn")
+const GAME_OVER_SCENE := preload("res://scenes/ui/game_over_scoreboard.tscn")
 const SCORE_FORMAT := "%d"
 const MAX_SCORE := 999
 const PORTRAIT_TARGET_SIZE := 28.0
@@ -19,6 +20,7 @@ var _entries_by_character: Dictionary = {}
 var _portrait_cache: Dictionary = {}
 
 func _ready() -> void:
+	add_to_group("score_counter")
 	call_deferred("_scan_existing_characters")
 	get_tree().node_added.connect(_on_node_added)
 
@@ -123,6 +125,9 @@ func _add_score(character: CharacterController, amount: int) -> void:
 	var entry: Dictionary = _entries_by_character[character]
 	entry["score"] = clampi(entry.get("score", 0) + amount, 0, MAX_SCORE)
 	_update_entry_label(entry)
+	
+	# Check win condition
+	_check_win_condition(character, entry["score"])
 
 func _update_entry_label(entry: Dictionary) -> void:
 	var label: Label = entry.get("label")
@@ -161,3 +166,43 @@ func _update_scale() -> void:
 	
 	# Apply scale to the entire score counter
 	scale = Vector2(target_scale, target_scale)
+
+func _check_win_condition(character: CharacterController, score: int) -> void:
+	var kills_to_win := GameSettings.get_kills_to_win()
+	if score >= kills_to_win:
+		# Someone won! Show game over screen
+		call_deferred("_show_game_over")
+
+func _show_game_over() -> void:
+	# Hide the score counter
+	hide()
+	
+	# Remove all characters from the scene
+	_remove_all_characters()
+	
+	# Pause the game
+	get_tree().paused = true
+	
+	# Create and show game over scoreboard
+	var game_over := GAME_OVER_SCENE.instantiate()
+	
+	# Get current level path
+	var current_scene := get_tree().current_scene
+	if current_scene:
+		game_over.set_current_level(current_scene.scene_file_path)
+	
+	# Add to scene tree (above pause menu layer)
+	get_tree().root.add_child(game_over)
+
+func _remove_all_characters() -> void:
+	# Get all characters and remove them
+	var characters := get_tree().get_nodes_in_group("characters")
+	for node in characters:
+		if is_instance_valid(node):
+			node.queue_free()
+
+func get_character_score(character: CharacterController) -> int:
+	if _entries_by_character.has(character):
+		var entry: Dictionary = _entries_by_character[character]
+		return entry.get("score", 0)
+	return 0

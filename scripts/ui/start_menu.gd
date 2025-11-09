@@ -12,6 +12,11 @@ const CPU_SELECT_POPUP_SCENE := preload("res://scenes/ui/cpu_select_popup.tscn")
 @onready var _prev_level_button: Button = $"%PrevLevelButton"
 @onready var _next_level_button: Button = $"%NextLevelButton"
 
+# Kills to win controls
+@onready var _decrease_kills_button: Button = $"%DecreaseKillsButton"
+@onready var _increase_kills_button: Button = $"%IncreaseKillsButton"
+@onready var _kills_display: Label = $"%KillsDisplay"
+
 # Clickable areas
 @onready var _player_button: Button = $"%PlayerButton"
 @onready var _cpu_button: Button = $"%CPUButton"
@@ -64,6 +69,8 @@ func _ready() -> void:
 	_new_game_button.pressed.connect(_on_new_game_pressed)
 	_prev_level_button.pressed.connect(_on_prev_level_pressed)
 	_next_level_button.pressed.connect(_on_next_level_pressed)
+	_decrease_kills_button.pressed.connect(_on_decrease_kills_pressed)
+	_increase_kills_button.pressed.connect(_on_increase_kills_pressed)
 	_player_button.pressed.connect(_on_character_select_pressed)
 	_cpu_button.pressed.connect(_on_cpu_select_pressed)
 	
@@ -71,6 +78,7 @@ func _ready() -> void:
 	
 	call_deferred("_populate_levels")
 	call_deferred("_update_preview_displays")
+	call_deferred("_update_kills_display")
 
 func _setup_popups() -> void:
 	# Instantiate level select popup
@@ -170,6 +178,14 @@ func _on_next_level_pressed() -> void:
 	_update_preview_displays()
 	_update_level_navigation_buttons()
 
+func _on_decrease_kills_pressed() -> void:
+	GameSettings.decrease_kills_to_win()
+	_update_kills_display()
+
+func _on_increase_kills_pressed() -> void:
+	GameSettings.increase_kills_to_win()
+	_update_kills_display()
+
 func _on_character_select_pressed() -> void:
 	_update_character_select_buttons()
 	_character_select_popup.popup_centered()
@@ -184,6 +200,7 @@ func _on_player_character_selected(character_name: String) -> void:
 	_log("Player character changed to: %s" % character_name)
 	_update_character_select_buttons()
 	_update_preview_displays()
+	_character_select_popup.hide()
 
 func _on_cpu_character_selected(character_name: String) -> void:
 	GameSettings.set_cpu_character(character_name)
@@ -426,3 +443,9 @@ func _update_level_navigation_buttons() -> void:
 	var has_levels := _level_paths.size() > 0
 	_prev_level_button.disabled = not has_levels
 	_next_level_button.disabled = not has_levels
+
+func _update_kills_display() -> void:
+	var kills := GameSettings.get_kills_to_win()
+	_kills_display.text = str(kills)
+	_decrease_kills_button.disabled = (kills <= GameSettings.MIN_KILLS_TO_WIN)
+	_increase_kills_button.disabled = (kills >= GameSettings.MAX_KILLS_TO_WIN)

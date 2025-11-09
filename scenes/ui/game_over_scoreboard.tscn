@@ -1,0 +1,111 @@
+[gd_scene load_steps=3 format=3 uid="uid://cu1y4mkvnr61v"]
+
+[ext_resource type="Script" path="res://scripts/ui/game_over_scoreboard.gd" id="1_script"]
+[ext_resource type="Theme" uid="uid://cc60i0866epm4" path="res://assets/ui/menu_theme.tres" id="2_theme"]
+
+[node name="GameOverScoreboard" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+theme = ExtResource("2_theme")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="PanelContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Game Over"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="PanelContainer/VBox"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="PanelContainer/VBox"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ScoreTable" type="VBoxContainer" parent="PanelContainer/VBox/ScrollContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="TableHeader" type="HBoxContainer" parent="PanelContainer/VBox/ScrollContainer/ScoreTable"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="KillsHeader" type="Label" parent="PanelContainer/VBox/ScrollContainer/ScoreTable/TableHeader"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Kills"
+horizontal_alignment = 1
+
+[node name="CharacterHeader" type="Label" parent="PanelContainer/VBox/ScrollContainer/ScoreTable/TableHeader"]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Character"
+horizontal_alignment = 1
+
+[node name="PlayerHeader" type="Label" parent="PanelContainer/VBox/ScrollContainer/ScoreTable/TableHeader"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Player"
+horizontal_alignment = 1
+
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBox"]
+layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="PanelContainer/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 20
+
+[node name="RestartButton" type="Button" parent="PanelContainer/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Restart"
+
+[node name="MenuButton" type="Button" parent="PanelContainer/VBox/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 50)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Main Menu"
+

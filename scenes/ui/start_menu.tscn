@@ -115,6 +115,45 @@ size_flags_vertical = 4
 theme_override_font_sizes/font_size = 26
 text = "Start New Game"
 
+[node name="KillsToWinSection" type="VBoxContainer" parent="PanelContainer/VBox/ContentHBox/Buttons"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 5
+
+[node name="KillsControls" type="HBoxContainer" parent="PanelContainer/VBox/ContentHBox/Buttons/KillsToWinSection"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 15
+
+[node name="DecreaseKillsButton" type="Button" parent="PanelContainer/VBox/ContentHBox/Buttons/KillsToWinSection/KillsControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "<"
+
+[node name="KillsDisplay" type="Label" parent="PanelContainer/VBox/ContentHBox/Buttons/KillsToWinSection/KillsControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(50, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "10"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="IncreaseKillsButton" type="Button" parent="PanelContainer/VBox/ContentHBox/Buttons/KillsToWinSection/KillsControls"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = ">"
+
+[node name="KillsLabel" type="Label" parent="PanelContainer/VBox/ContentHBox/Buttons/KillsToWinSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Kills to Win"
+horizontal_alignment = 1
+
 [node name="RightPanel" type="VBoxContainer" parent="PanelContainer/VBox/ContentHBox"]
 layout_mode = 2
 size_flags_horizontal = 3

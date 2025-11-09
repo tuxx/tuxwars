@@ -18,6 +18,10 @@ func _input(event: InputEvent) -> void:
 
 
 func _toggle_pause() -> void:
+	# Don't allow pause menu if game over is active
+	if get_tree().get_nodes_in_group("game_over_active").size() > 0:
+		return
+	
 	if get_tree().paused:
 		get_tree().paused = false
 		if is_instance_valid(_pause_menu):

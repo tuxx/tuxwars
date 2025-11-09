@@ -6,9 +6,12 @@ extends Node
 var cpu_count: int = 1  # Number of CPU opponents (1-7)
 var player_character: String = "tux"  # Player's selected character
 var cpu_character: String = "beasty"  # CPU's selected character
+var kills_to_win: int = 10  # Number of kills needed to win
 
 const MIN_CPU_COUNT: int = 1
 const MAX_CPU_COUNT: int = 7
+const MIN_KILLS_TO_WIN: int = 3
+const MAX_KILLS_TO_WIN: int = 50
 
 # Available characters
 const AVAILABLE_CHARACTERS: Array[String] = ["tux", "beasty", "gopher"]
@@ -49,4 +52,16 @@ func get_character_display_name(character_name: String) -> String:
 			return "Gopher"
 		_:
 			return character_name.capitalize()
+
+func set_kills_to_win(kills: int) -> void:
+	kills_to_win = clampi(kills, MIN_KILLS_TO_WIN, MAX_KILLS_TO_WIN)
+
+func get_kills_to_win() -> int:
+	return kills_to_win
+
+func increase_kills_to_win() -> void:
+	set_kills_to_win(kills_to_win + 1)
+
+func decrease_kills_to_win() -> void:
+	set_kills_to_win(kills_to_win - 1)
 
