@@ -22,6 +22,7 @@ func _ready() -> void:
 		desired_draw_jump = not desired_draw_jump
 		_apply_toggle_states()
 	)
+	InputManager.debug_pause_toggled.connect(_toggle_debug_pause)
 
 	# Full-rect root to let containers position panel at top-right with margins
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -111,3 +112,9 @@ func _apply_toggle_states() -> void:
 		nav.set_debug_draw_graph(desired_draw_graph)
 	if nav.debug_draw_jump_arcs != desired_draw_jump:
 		nav.set_debug_draw_jump_arcs(desired_draw_jump)
+
+
+func _toggle_debug_pause() -> void:
+	# Toggle game pause without showing any menu (for debugging)
+	get_tree().paused = not get_tree().paused
+	print("[Dev] Debug pause: ", "PAUSED" if get_tree().paused else "UNPAUSED")

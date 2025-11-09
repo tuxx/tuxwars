@@ -4,6 +4,7 @@ signal pause_toggled
 signal dev_menu_toggled
 signal nav_graph_toggled
 signal jump_arcs_toggled
+signal debug_pause_toggled
 
 const DEADZONE := 0.5
 
@@ -24,6 +25,8 @@ func _process(_delta: float) -> void:
 		nav_graph_toggled.emit()
 	if Input.is_action_just_pressed("toggle_jump_arcs"):
 		jump_arcs_toggled.emit()
+	if Input.is_action_just_pressed("debug_pause"):
+		debug_pause_toggled.emit()
 
 
 # --- Public helpers for gameplay code (characters, etc.) ---
@@ -62,6 +65,7 @@ func _ensure_default_actions() -> void:
 	_ensure_action("toggle_dev_menu")
 	_ensure_action("toggle_nav_graph")
 	_ensure_action("toggle_jump_arcs")
+	_ensure_action("debug_pause")
 
 	# Keyboard mappings (WASD + Arrows)
 	_add_key_if_missing("move_left", KEY_A)
@@ -86,10 +90,11 @@ func _ensure_default_actions() -> void:
 	_add_key_if_missing("ui_cancel", KEY_ESCAPE)
 	_add_key_if_missing("pause", KEY_ESCAPE)
 
-	# Dev keys (F keys)
+	# Dev keys (F keys and P for pause)
 	_add_key_if_missing("toggle_dev_menu", KEY_F10)
 	_add_key_if_missing("toggle_nav_graph", KEY_F11)
 	_add_key_if_missing("toggle_jump_arcs", KEY_F12)
+	_add_key_if_missing("debug_pause", KEY_P)
 
 	# Controller - buttons
 	_add_joy_button_if_missing("jump", JOY_BUTTON_A) # South (A on Xbox)
