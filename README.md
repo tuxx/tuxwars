@@ -32,6 +32,7 @@ A fan-inspired arena platformer built with Godot 4, following Super Mario War co
 
 **Quick Links**:
 - **[Level Design Guide](docs/level-design/README.md)** - Create levels for Super Tux War
+- **[Character System](docs/character-system/README.md)** - Component-based character architecture
 - **[Contributing Guide](docs/CONTRIBUTING.md)** - How to contribute (includes needed assets list)
 - **[Roadmap](docs/ROADMAP.md)** - Feature roadmap and development priorities
 
