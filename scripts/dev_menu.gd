@@ -12,6 +12,16 @@ func _ready() -> void:
 		return
 	# Ensure the dev menu still processes input/UI when the game is paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Listen to centralized input toggles
+	InputManager.dev_menu_toggled.connect(func(): visible = not visible)
+	InputManager.nav_graph_toggled.connect(func():
+		desired_draw_graph = not desired_draw_graph
+		_apply_toggle_states()
+	)
+	InputManager.jump_arcs_toggled.connect(func():
+		desired_draw_jump = not desired_draw_jump
+		_apply_toggle_states()
+	)
 
 	# Full-rect root to let containers position panel at top-right with margins
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -65,21 +75,10 @@ func _ready() -> void:
 
 	_apply_toggle_states()
 
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(_event: InputEvent) -> void:
+	# Handled via InputManager signals
 	if not OS.is_debug_build():
 		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key_event: InputEventKey = event as InputEventKey
-		if key_event.keycode == KEY_P:
-			get_tree().paused = not get_tree().paused
-		elif key_event.keycode == KEY_F10:
-			visible = not visible
-		elif key_event.keycode == KEY_F11:
-			desired_draw_graph = not desired_draw_graph
-			_apply_toggle_states()
-		elif key_event.keycode == KEY_F12:
-			desired_draw_jump = not desired_draw_jump
-			_apply_toggle_states()
 
 
 func _make_separator() -> Control:

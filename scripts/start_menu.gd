@@ -6,6 +6,7 @@ func _ready() -> void:
 	# Full-rect root
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_new_game_button.pressed.connect(_on_new_game_pressed)
+	_new_game_button.grab_focus()
 
 
 func _on_new_game_pressed() -> void:

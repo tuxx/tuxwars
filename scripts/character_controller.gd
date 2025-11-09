@@ -145,18 +145,18 @@ func _physics_process(delta: float) -> void:
 
 func _handle_input() -> void:
 	# Horizontal movement input
-	var input_direction = Input.get_axis("move_left", "move_right")
+	var input_direction = InputManager.get_move_axis_x()
 	velocity.x = input_direction * move_speed
 	
 	# Drop-through semisolid platforms (Down + Jump)
-	if Input.is_action_pressed("move_down") and Input.is_action_just_pressed("jump") and is_on_floor():
+	if InputManager.is_move_down_pressed() and InputManager.is_jump_just_pressed() and is_on_floor():
 		# Initiate drop-through by temporarily disabling one-way collision detection
 		drop_through_timer = DROP_THROUGH_DURATION
 		position.y += 1  # Small nudge down to clear the platform
 		return
 	
 	# Jump with coyote time and buffering
-	if Input.is_action_just_pressed("jump") and not Input.is_action_pressed("move_down"):
+	if InputManager.is_jump_just_pressed() and not InputManager.is_move_down_pressed():
 		if coyote_timer > 0.0:
 			_perform_jump()
 			coyote_timer = 0.0
@@ -165,7 +165,7 @@ func _handle_input() -> void:
 			jump_buffer_timer = GameConstants.JUMP_BUFFER_TIME
 	
 	# Variable jump: early release clamp
-	if Input.is_action_just_released("jump") and velocity.y < 0:
+	if InputManager.is_jump_just_released() and velocity.y < 0:
 		if velocity.y < GameConstants.JUMP_EARLY_CLAMP:
 			velocity.y = GameConstants.JUMP_EARLY_CLAMP
 

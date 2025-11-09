@@ -10,6 +10,8 @@ var _pause_menu: Control = null
 func _ready() -> void:
 	# Ensure we run even when paused and across scenes
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Hook centralized input toggles
+	InputManager.pause_toggled.connect(_toggle_pause)
 
 
 func _process(_delta: float) -> void:
@@ -20,12 +22,9 @@ func _process(_delta: float) -> void:
 		_ensure_dev_menu(cs)
 
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key_event := event as InputEventKey
-		if key_event.keycode == KEY_ESCAPE:
-			_toggle_pause()
-			get_viewport().set_input_as_handled()
+func _input(_event: InputEvent) -> void:
+	# Input handled centrally by InputManager; keep stub to avoid previous behavior
+	pass
 
 
 func _ensure_hud(root: Node) -> void:

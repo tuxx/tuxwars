@@ -58,3 +58,4 @@ move_down={
 [autoload]
 
 UIManager="*res://scripts/ui_manager.gd"
+InputManager="*res://scripts/input_manager.gd"

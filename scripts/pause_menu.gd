@@ -11,15 +11,15 @@ func _ready() -> void:
 	
 	_resume_button.pressed.connect(_on_resume_pressed)
 	_new_game_button.pressed.connect(_on_new_game_pressed)
+	visibility_changed.connect(_on_visibility_changed)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Allow ESC to resume while the pause menu is visible
 	if not visible:
 		return
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key_event := event as InputEventKey
-		if key_event.keycode == KEY_ESCAPE:
+	if event.is_pressed() and not event.is_echo():
+		if Input.is_action_pressed("ui_cancel") or Input.is_action_pressed("pause"):
 			_on_resume_pressed()
 
 
@@ -33,4 +33,8 @@ func _on_new_game_pressed() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/levels/tile_map.tscn")
 
+
+func _on_visibility_changed() -> void:
+	if visible:
+		_resume_button.grab_focus()
 
