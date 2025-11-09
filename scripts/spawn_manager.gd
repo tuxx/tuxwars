@@ -5,6 +5,18 @@ const NPC_SCENE := preload("res://scenes/characters/npc_character.tscn")
 
 const SAFE_SPAWN_DISTANCE := GameConstants.TILE_SIZE * 4.0
 
+# Color palette for CPU characters
+const CPU_COLORS := [
+	Color(1.0, 1.0, 1.0),      # 0: White (default/original color)
+	Color(0.2, 0.2, 0.2),      # 1: Black/Dark Gray
+	Color(0.3, 0.3, 1.0),      # 2: Blue
+	Color(0.3, 1.0, 0.3),      # 3: Green
+	Color(1.0, 1.0, 0.3),      # 4: Yellow
+	Color(1.0, 0.5, 0.0),      # 5: Orange
+	Color(0.8, 0.3, 1.0),      # 6: Purple
+	Color(0.3, 1.0, 1.0),      # 7: Cyan
+]
+
 var _spawn_points: Array[SpawnPoint] = []
 var _last_point_by_id: Dictionary = {}   # character RID (int) -> SpawnPoint
 
@@ -29,20 +41,38 @@ func _initial_spawn() -> void:
 			child.queue_free()
 	await get_tree().process_frame
 
-	# Pick distinct points for one player and one NPC
+	# Spawn player
 	var player_point := _pick_point_for_role("player", null)
-	var npc_point := _pick_point_for_role("npc", player_point)
+	var last_point: SpawnPoint = player_point
 
 	if player_point != null:
 		var player := PLAYER_SCENE.instantiate()
 		get_parent().add_child(player)
 		player.global_position = player_point.global_position
 		_last_point_by_id[player.get_instance_id()] = player_point
-	if npc_point != null:
-		var npc := NPC_SCENE.instantiate()
-		get_parent().add_child(npc)
-		npc.global_position = npc_point.global_position
-		_last_point_by_id[npc.get_instance_id()] = npc_point
+	
+	# Spawn multiple NPCs based on GameSettings
+	var cpu_count := 1
+	if has_node("/root/GameSettings"):
+		cpu_count = GameSettings.get_cpu_count()
+	for i in range(cpu_count):
+		var npc_point := _pick_point_for_role("npc", last_point)
+		if npc_point != null:
+			var npc := NPC_SCENE.instantiate()
+			get_parent().add_child(npc)
+			npc.global_position = npc_point.global_position
+			
+			# Assign unique color to each CPU (cycles through palette)
+			var color_index := i % CPU_COLORS.size()
+			npc.character_color = CPU_COLORS[color_index]
+			
+			# Apply modulate to tint the sprite
+			var sprite := npc.get_node_or_null("AnimatedSprite2D")
+			if sprite:
+				sprite.modulate = CPU_COLORS[color_index]
+			
+			_last_point_by_id[npc.get_instance_id()] = npc_point
+			last_point = npc_point
 
 
 func get_spawn_position_for(character: CharacterController) -> Vector2:

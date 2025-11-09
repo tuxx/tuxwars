@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 UIManager="*res://scripts/ui_manager.gd"
 InputManager="*res://scripts/input_manager.gd"
+GameSettings="*res://scripts/game_settings.gd"
 
 [display]
 

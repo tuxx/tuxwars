@@ -1,6 +1,11 @@
 extends Control
 
 @onready var _new_game_button: Button = $PanelContainer/VBox/Buttons/NewGameButton
+@onready var _vbox: VBoxContainer = $PanelContainer/VBox
+
+var _cpu_count_minus: Button = null
+var _cpu_count_plus: Button = null
+var _cpu_count_label: Label = null
 @onready var _card1_container: PanelContainer = $PanelContainer/VBox/LevelScroll/CenterContainer/LevelGrid/LevelCard1
 @onready var _card1_border: ReferenceRect = $PanelContainer/VBox/LevelScroll/CenterContainer/LevelGrid/LevelCard1/Border
 @onready var _card1_button: Button = $PanelContainer/VBox/LevelScroll/CenterContainer/LevelGrid/LevelCard1/Button
@@ -46,8 +51,21 @@ func _ready() -> void:
 		_debug_label.custom_minimum_size = Vector2(600, 0)
 		add_child(_debug_label)
 		_log("Debug overlay enabled (web).")
+	
+	# Create CPU count selector UI
+	_create_cpu_count_ui()
+	
 	_new_game_button.pressed.connect(_on_new_game_pressed)
 	_new_game_button.grab_focus()
+	
+	# Connect CPU count buttons
+	if _cpu_count_minus:
+		_cpu_count_minus.pressed.connect(_on_cpu_count_minus_pressed)
+	if _cpu_count_plus:
+		_cpu_count_plus.pressed.connect(_on_cpu_count_plus_pressed)
+	if _cpu_count_label:
+		_update_cpu_count_display()
+	
 	# Collect card node arrays and wire their click handlers once
 	_card_containers = [_card1_container, _card2_container]
 	_card_borders = [_card1_border, _card2_border]
@@ -80,6 +98,36 @@ func _on_new_game_pressed() -> void:
 	
 	if level_to_load != "":
 		get_tree().change_scene_to_file(level_to_load)
+
+
+func _on_cpu_count_minus_pressed() -> void:
+	if has_node("/root/GameSettings"):
+		GameSettings.decrease_cpu_count()
+		_update_cpu_count_display()
+
+
+func _on_cpu_count_plus_pressed() -> void:
+	if has_node("/root/GameSettings"):
+		GameSettings.increase_cpu_count()
+		_update_cpu_count_display()
+
+
+func _update_cpu_count_display() -> void:
+	if not _cpu_count_label:
+		return
+	
+	if not has_node("/root/GameSettings"):
+		_cpu_count_label.text = "1"
+		return
+	
+	var count := GameSettings.get_cpu_count()
+	_cpu_count_label.text = str(count)
+	
+	# Disable buttons at limits
+	if _cpu_count_minus:
+		_cpu_count_minus.disabled = (count <= GameSettings.MIN_CPU_COUNT)
+	if _cpu_count_plus:
+		_cpu_count_plus.disabled = (count >= GameSettings.MAX_CPU_COUNT)
 
 func _populate_levels() -> void:
 	# Clear old entries if any
@@ -240,3 +288,75 @@ func _fallback_display_name_from_path(level_path: String) -> String:
 	if base.begins_with("level"):
 		return "Level " + base.substr(5, base.length() - 5)
 	return base.capitalize()
+
+
+func _create_cpu_count_ui() -> void:
+	# Create CPU count selector and add it to the VBox (before level scroll)
+	var cpu_section := VBoxContainer.new()
+	cpu_section.name = "CPUCountSection"
+	
+	# Title label
+	var title_label := Label.new()
+	title_label.text = "CPU Opponents"
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.add_theme_font_size_override("font_size", 20)
+	cpu_section.add_child(title_label)
+	
+	# Add some spacing
+	var spacer1 := Control.new()
+	spacer1.custom_minimum_size = Vector2(0, 10)
+	cpu_section.add_child(spacer1)
+	
+	# HBox for controls
+	var hbox := HBoxContainer.new()
+	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	cpu_section.add_child(hbox)
+	
+	# Minus button
+	_cpu_count_minus = Button.new()
+	_cpu_count_minus.text = "−"
+	_cpu_count_minus.custom_minimum_size = Vector2(50, 50)
+	_cpu_count_minus.add_theme_font_size_override("font_size", 24)
+	hbox.add_child(_cpu_count_minus)
+	
+	# Spacer
+	var spacer2 := Control.new()
+	spacer2.custom_minimum_size = Vector2(20, 0)
+	hbox.add_child(spacer2)
+	
+	# Count label
+	_cpu_count_label = Label.new()
+	_cpu_count_label.text = "1"
+	_cpu_count_label.custom_minimum_size = Vector2(60, 50)
+	_cpu_count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cpu_count_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_cpu_count_label.add_theme_font_size_override("font_size", 28)
+	hbox.add_child(_cpu_count_label)
+	
+	# Spacer
+	var spacer3 := Control.new()
+	spacer3.custom_minimum_size = Vector2(20, 0)
+	hbox.add_child(spacer3)
+	
+	# Plus button
+	_cpu_count_plus = Button.new()
+	_cpu_count_plus.text = "+"
+	_cpu_count_plus.custom_minimum_size = Vector2(50, 50)
+	_cpu_count_plus.add_theme_font_size_override("font_size", 24)
+	hbox.add_child(_cpu_count_plus)
+	
+	# Add another spacer after the controls
+	var spacer4 := Control.new()
+	spacer4.custom_minimum_size = Vector2(0, 20)
+	cpu_section.add_child(spacer4)
+	
+	# Find the LevelScroll node and insert CPU section before it
+	var level_scroll := _vbox.get_node_or_null("LevelScroll")
+	if level_scroll:
+		var index := level_scroll.get_index()
+		_vbox.add_child(cpu_section)
+		_vbox.move_child(cpu_section, index)
+	else:
+		# Fallback: add at the beginning
+		_vbox.add_child(cpu_section)
+		_vbox.move_child(cpu_section, 0)

@@ -6,6 +6,13 @@ const SCORE_FORMAT := "%d"
 const MAX_SCORE := 999
 const PORTRAIT_TARGET_SIZE := 28.0
 const PORTRAIT_TEXTURE_PATH := "res://assets/characters/%s/base-16x16.png"
+
+# Scaling thresholds based on character count
+const SCALE_NORMAL := 1.0      # 1-2 characters
+const SCALE_SMALL := 0.85      # 3-4 characters
+const SCALE_SMALLER := 0.70    # 5-6 characters
+const SCALE_TINY := 0.60       # 7+ characters
+
 @onready var _entries_container: HBoxContainer = $"Entries"
 
 var _entries_by_character: Dictionary = {}
@@ -43,6 +50,9 @@ func _register_character(character: CharacterController) -> void:
 	_update_entry_label(entry)
 	character.enemy_killed.connect(_on_character_enemy_killed.bind(character))
 	character.tree_exiting.connect(_on_character_tree_exiting.bind(character))
+	
+	# Update scale based on total character count
+	_update_scale()
 
 func _create_entry_ui() -> Dictionary:
 	var node := SCORE_ENTRY_SCENE.instantiate() as Control
@@ -64,6 +74,9 @@ func _update_entry_portrait(character: CharacterController, entry: Dictionary) -
 		texture = _get_sprite_frame_texture(character)
 	if texture:
 		portrait.texture = texture
+	
+	# Apply character's color tint to the portrait
+	portrait.modulate = character.character_color
 
 func _get_character_portrait_texture(character: CharacterController) -> Texture2D:
 	if character == null:
@@ -127,3 +140,24 @@ func _on_character_tree_exiting(character: CharacterController) -> void:
 	var node: Control = entry.get("node")
 	if node:
 		node.queue_free()
+	
+	# Update scale after removing a character
+	_update_scale()
+
+
+func _update_scale() -> void:
+	# Scale down the score counter based on number of entries
+	var count := _entries_by_character.size()
+	var target_scale: float
+	
+	if count <= 2:
+		target_scale = SCALE_NORMAL
+	elif count <= 4:
+		target_scale = SCALE_SMALL
+	elif count <= 6:
+		target_scale = SCALE_SMALLER
+	else:
+		target_scale = SCALE_TINY
+	
+	# Apply scale to the entire score counter
+	scale = Vector2(target_scale, target_scale)

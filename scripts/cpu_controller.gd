@@ -111,19 +111,24 @@ func _refresh_target() -> void:
 
 
 func _pick_target() -> CharacterController:
-	var candidates = get_tree().get_nodes_in_group("players")
+	# Target any character (players and other NPCs), not just players
+	var candidates = get_tree().get_nodes_in_group("characters")
 	var best: CharacterController = null
 	var best_dist := INF
 	for node in candidates:
 		if not node is CharacterController:
 			continue
-		var player := node as CharacterController
-		if player.is_despawned:
+		var other := node as CharacterController
+		# Skip self
+		if other == character:
 			continue
-		var dist := character.global_position.distance_to(player.global_position)
+		# Skip despawned characters
+		if other.is_despawned:
+			continue
+		var dist := character.global_position.distance_to(other.global_position)
 		if dist < best_dist:
 			best_dist = dist
-			best = player
+			best = other
 	return best
 
 
@@ -302,11 +307,15 @@ func _foot_close_to_node(node: LevelNavigation.NodeEntry) -> bool:
 
 
 func _check_danger() -> Dictionary:
-	var bodies = get_tree().get_nodes_in_group("players")
+	# Check for danger from any character (players and other NPCs) falling on us
+	var bodies = get_tree().get_nodes_in_group("characters")
 	for node in bodies:
 		if not node is CharacterController:
 			continue
 		var other := node as CharacterController
+		# Skip self
+		if other == character:
+			continue
 		if other.is_despawned:
 			continue
 		var rel := other.global_position - character.global_position
