@@ -249,50 +249,25 @@ func _populate_levels() -> void:
 	_level_paths.clear()
 	_log("Populate levels started.")
 	var dir_path := "res://scenes/levels"
+	var thumbs_path := "res://assets/level_thumbs"
 	
-	var files: PackedStringArray = DirAccess.get_files_at(dir_path)
-	_log("DirAccess.get_files_at -> %d entries" % files.size())
-	
-	if files.is_empty():
-		var dir := DirAccess.open(dir_path)
-		_log("DirAccess.open(%s) -> %s" % [dir_path, str(dir != null)])
-		if dir:
-			dir.list_dir_begin()
-			var entry_name := dir.get_next()
-			while entry_name != "":
-				if not dir.current_is_dir():
-					files.append(entry_name)
-				entry_name = dir.get_next()
-			dir.list_dir_end()
-		_log("DirAccess iteration -> %d entries" % files.size())
-	
-	# For web builds or if directory listing failed, probe for known levels
-	if files.is_empty():
-		_log("Directory listing empty, probing for levels...")
-		for n in range(1, 21):  # Check level01 through level20
-			var candidate_path := "%s/level%02d.tscn" % [dir_path, n]
-			if ResourceLoader.exists(candidate_path):
-				_level_paths.append(candidate_path)
-				_log("Found level: %s" % candidate_path)
-	else:
-		# Process files from directory listing
-		files.sort()
-		for file_name in files:
-			var lower := String(file_name).to_lower()
-			if not lower.ends_with(".tscn"):
-				continue
-			if not lower.begins_with("level"):
-				continue
-			var level_path := dir_path + "/" + file_name
-			var exists := ResourceLoader.exists(level_path)
-			if not exists:
-				var test := load(level_path)
-				if test != null:
-					exists = true
-			if exists:
+	# Check which levels have thumbnails (more reliable for web builds)
+	_log("Checking for level thumbnails...")
+	for n in range(1, 100):  # Check up to level99
+		var thumb_path := "%s/level%02d.png" % [thumbs_path, n]
+		if ResourceLoader.exists(thumb_path):
+			var level_path := "%s/level%02d.tscn" % [dir_path, n]
+			# Verify the level scene also exists
+			if ResourceLoader.exists(level_path):
 				_level_paths.append(level_path)
+				_log("Found level with thumbnail: level%02d" % n)
+		else:
+			# Stop checking once we hit a missing thumbnail
+			# (assumes sequential numbering)
+			if n > 5:  # Only break after checking at least level05
+				break
 	
-	_log("Found %d actual level(s)" % _level_paths.size())
+	_log("Found %d level(s) with thumbnails" % _level_paths.size())
 	
 	if _level_paths.size() > 0:
 		_selected_level_index = 0
