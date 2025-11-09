@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=4 uid="uid://brgkt17ijgavn"]
+[gd_scene load_steps=7 format=4 uid="uid://brgkt17ijgavn"]
 
 [ext_resource type="TileSet" uid="uid://bd71pjju517dp" path="res://assets/tilesets/smw_blocks.tres" id="1_tileset"]
 [ext_resource type="Script" uid="uid://b0h4fj6ipj5ur" path="res://scripts/level_navigation.gd" id="2_level_navigation"]
 [ext_resource type="PackedScene" uid="uid://c4dwbqdkxmm42" path="res://scenes/characters/player_character.tscn" id="3_player_scene"]
 [ext_resource type="PackedScene" uid="uid://o0yj30qpa4ym" path="res://scenes/characters/npc_character.tscn" id="4_npc_scene"]
 [ext_resource type="Script" uid="uid://bi6lx7ircvkf" path="res://scripts/dev_menu.gd" id="5_dev_menu"]
+[ext_resource type="Script" uid="uid://bwo8365ee6b7w" path="res://scripts/score_counter.gd" id="6_score_counter"]
 
 [node name="TileMapLevel" type="Node2D"]
 script = ExtResource("2_level_navigation")
@@ -33,3 +34,31 @@ position = Vector2(786, 653)
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("5_dev_menu")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="ScoreCounter" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 626.0
+offset_top = 46.0
+offset_right = 626.0
+offset_bottom = 106.0
+mouse_filter = 2
+script = ExtResource("6_score_counter")
+
+[node name="Entries" type="HBoxContainer" parent="HUD/ScoreCounter"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_constants/separation = 12

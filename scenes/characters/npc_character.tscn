@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://o0yj30qpa4ym"]
+[gd_scene load_steps=13 format=3 uid="uid://o0yj30qpa4ym"]
 
 [ext_resource type="Script" uid="uid://de6d7kdce320s" path="res://scripts/character_controller.gd" id="1_character_script"]
 [ext_resource type="Texture2D" uid="uid://c8ut8nmdaudpq" path="res://assets/characters/beasty/spritesheets/idle.png" id="2_vwdjj"]
-[ext_resource type="Script" path="res://scripts/cpu_controller.gd" id="3_cpu_controller"]
+[ext_resource type="Script" uid="uid://rr0k6kt7xn64" path="res://scripts/cpu_controller.gd" id="3_cpu_controller"]
+[ext_resource type="Texture2D" uid="uid://cuaqm1l4oc48h" path="res://assets/characters/beasty/spritesheets/run.png" id="3_l1lkx"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(92, 116)
@@ -14,6 +15,22 @@ region = Rect2(0, 0, 128, 128)
 [sub_resource type="AtlasTexture" id="AtlasTexture_l1lkx"]
 atlas = ExtResource("2_vwdjj")
 region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpq63"]
+atlas = ExtResource("3_l1lkx")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oiye3"]
+atlas = ExtResource("3_l1lkx")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ax4aq"]
+atlas = ExtResource("3_l1lkx")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v5tkn"]
+atlas = ExtResource("3_l1lkx")
+region = Rect2(384, 0, 128, 128)
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_cpq63"]
 animations = [{
@@ -30,19 +47,26 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_5lcte")
+"texture": SubResource("AtlasTexture_cpq63")
 }, {
 "duration": 1.0,
-"texture": SubResource("AtlasTexture_l1lkx")
+"texture": SubResource("AtlasTexture_oiye3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ax4aq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v5tkn")
 }],
 "loop": true,
 "name": &"run",
-"speed": 5.0
+"speed": 8.0
 }]
 
 [node name="NPCCharacter" type="CharacterBody2D"]
 script = ExtResource("1_character_script")
 character_color = Color(1, 0, 0, 1)
+character_asset_name = "beasty"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1.5, 1.5)

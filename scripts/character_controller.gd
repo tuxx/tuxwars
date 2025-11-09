@@ -1,12 +1,15 @@
 extends CharacterBody2D
 class_name CharacterController
 
+signal enemy_killed(victim: CharacterBody2D)
+
 # Movement and physics properties
 @export var move_speed: float = GameConstants.PLAYER_MAX_WALK_SPEED
 @export var jump_velocity: float = GameConstants.JUMP_VELOCITY
 @export var gravity: float = GameConstants.GRAVITY
 @export var is_player: bool = false
 @export var character_color: Color = Color.WHITE
+@export var character_asset_name: String = ""
 @export var max_fall_speed: float = GameConstants.MAX_FALL_SPEED
 @export var foot_offset: float = 14.0
 
@@ -60,6 +63,7 @@ func _ready():
 	if shape_dead:
 		shape_dead.disabled = true
 
+	add_to_group("characters")
 	# Register player in group for dev tools and gameplay systems
 	if is_player:
 		add_to_group("players")
@@ -245,9 +249,10 @@ func _check_character_collisions(previous_velocity_y: float) -> void:
 		var collider = collision.get_collider()
 		
 		# Only process character-to-character collisions
-		if collider is CharacterBody2D and collider != self and collider.has_method("despawn"):
+		var other_character := collider as CharacterController
+		if other_character and other_character != self:
 			# Ignore already-despawned targets
-			if collider.has_method("get") and collider.get("is_despawned") == true:
+			if other_character.is_despawned:
 				continue
 			
 			var normal: Vector2 = collision.get_normal()
@@ -262,11 +267,11 @@ func _check_character_collisions(previous_velocity_y: float) -> void:
 			
 			if hit_their_top:
 				# Successful stomp - they die, we bounce
-				collider.despawn()
+				other_character.despawn(self)
 				velocity.y = jump_velocity * 0.5
 			elif hit_their_bottom:
-				# Hit their bottom from below - we die
-				despawn()
+				# Hit their bottom from below - we die and credit them
+				despawn(other_character)
 			# Side collisions (normal.x dominant) are harmless - do nothing
 
 func _wrap_after_motion() -> void:
@@ -292,13 +297,16 @@ func _wrap_after_motion() -> void:
 		pos.y = bottom - wrap_offset
 	global_position = pos
 
-func despawn() -> void:
+func despawn(killer: CharacterController = null) -> void:
 	if is_despawned:
 		return
 	
 	is_despawned = true
 	respawn_timer = 0.0
 	velocity = Vector2.ZERO
+	
+	if killer and killer != self:
+		killer.enemy_killed.emit(self)
 	
 	var has_death_anim: bool = false
 	if animated_sprite:

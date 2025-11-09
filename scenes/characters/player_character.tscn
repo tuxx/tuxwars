@@ -103,6 +103,7 @@ animations = [{
 script = ExtResource("1_character_script")
 is_player = true
 character_color = Color(0, 0.5, 1, 1)
+character_asset_name = "tux"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1)
