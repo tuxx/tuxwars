@@ -1,5 +1,11 @@
 extends Node
 
+## Manages character spawning and respawn point selection.
+##
+## Handles initial spawn of player and NPCs with selected character skins,
+## assigns unique colors to NPCs, and provides respawn positions that avoid
+## placing characters too close to each other.
+
 const PLAYER_SCENE := preload("res://scenes/characters/player_character.tscn")
 const NPC_SCENE := preload("res://scenes/characters/npc_character.tscn")
 
@@ -39,6 +45,8 @@ func _initial_spawn() -> void:
 	for child in get_children():
 		if child is CharacterBody2D:
 			child.queue_free()
+	# Wait 2 frames to ensure all characters are fully freed
+	await get_tree().process_frame
 	await get_tree().process_frame
 
 	# Get selected characters from GameSettings
@@ -110,7 +118,7 @@ func get_spawn_position_for(character: CharacterController) -> Vector2:
 	return point.global_position
 
 
-func _pick_point_for_role(role: String, avoid_point: SpawnPoint, occupied_positions: Array[Vector2] = []) -> SpawnPoint:
+func _pick_point_for_role(role: String, avoid_point: SpawnPoint, occupied_positions: Array[Vector2]) -> SpawnPoint:
 	if _spawn_points.is_empty():
 		return null
 	# Filter by allowed role
@@ -142,7 +150,8 @@ func _pick_point_for_role(role: String, avoid_point: SpawnPoint, occupied_positi
 
 	# Avoid being too close to any living character OR occupied spawn positions
 	var safe_candidates: Array[SpawnPoint] = []
-	var others: Array = get_tree().get_nodes_in_group("characters")
+	var others: Array[Node] = []
+	others.assign(get_tree().get_nodes_in_group("characters"))
 	
 	for p in candidates:
 		var is_safe := true

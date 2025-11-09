@@ -1,8 +1,12 @@
 extends Node
 
-#const GAME_CONSTANTS = preload("res://scripts/game_constants.gd")
+## AI controller for NPC characters using navigation and tactical decision-making.
+##
+## Uses LevelNavigation for pathfinding, implements tactical behaviors (stomping,
+## danger avoidance, direct chase), and caches character lists for performance.
+## Runs pathfinding at ~6.7Hz and updates target locks periodically.
 
-const THINK_INTERVAL := 0.067
+const THINK_INTERVAL := 0.15  # Reduced from 0.067 for better performance
 const TARGET_LOCK_TIME := 1.0
 const WALK_REACH_EPS := 6.0
 const ALIGNMENT_WINDOW := 8.0
@@ -28,6 +32,11 @@ var target: CharacterController
 var think_timer: float = 0.0
 var target_lock_timer: float = 0.0
 
+# Cached character list (performance optimization)
+var _cached_characters: Array[CharacterController] = []
+var _character_cache_timer: float = 0.0
+const CHARACTER_CACHE_REFRESH_INTERVAL := 1.0
+
 var current_plan: Array = []
 var active_edge: Dictionary = {}
 var active_edge_target_id: int = -1
@@ -52,6 +61,12 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if character == null or navigation == null or character.is_despawned:
 		return
+	
+	# Update character cache periodically
+	_character_cache_timer -= delta
+	if _character_cache_timer <= 0.0:
+		_character_cache_timer = CHARACTER_CACHE_REFRESH_INTERVAL
+		_refresh_character_cache()
 
 	think_timer -= delta
 	if think_timer <= 0.0:
@@ -112,13 +127,9 @@ func _refresh_target() -> void:
 
 func _pick_target() -> CharacterController:
 	# Target any character (players and other NPCs), not just players
-	var candidates = get_tree().get_nodes_in_group("characters")
 	var best: CharacterController = null
 	var best_dist := INF
-	for node in candidates:
-		if not node is CharacterController:
-			continue
-		var other := node as CharacterController
+	for other in _cached_characters:
 		# Skip self
 		if other == character:
 			continue
@@ -308,11 +319,7 @@ func _foot_close_to_node(node: LevelNavigation.NodeEntry) -> bool:
 
 func _check_danger() -> Dictionary:
 	# Check for danger from any character (players and other NPCs) falling on us
-	var bodies = get_tree().get_nodes_in_group("characters")
-	for node in bodies:
-		if not node is CharacterController:
-			continue
-		var other := node as CharacterController
+	for other in _cached_characters:
 		# Skip self
 		if other == character:
 			continue
@@ -527,6 +534,13 @@ func _handle_blocked_state(action: Dictionary, delta: float) -> Dictionary:
 			action["move_dir"] = -last_move_dir
 	return action
 
+
+func _refresh_character_cache() -> void:
+	_cached_characters.clear()
+	var nodes := get_tree().get_nodes_in_group("characters")
+	for node in nodes:
+		if node is CharacterController:
+			_cached_characters.append(node)
 
 func _attempt_direct_stomp() -> Dictionary:
 	if target == null or character == null:

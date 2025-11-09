@@ -1,17 +1,27 @@
 extends Node
 
+## Manages UI lifecycle across scenes.
+##
+## Ensures HUD (score counter) and dev menu exist in gameplay scenes,
+## responds to game state events to show/hide pause menu and game over screen.
+
 const SCORE_COUNTER_SCENE := preload("res://scenes/ui/score_counter.tscn")
 const DEV_MENU_SCENE := preload("res://scenes/ui/dev_menu.tscn")
 const PAUSE_MENU_SCENE := preload("res://scenes/ui/pause_menu.tscn")
+const GAME_OVER_SCENE := preload("res://scenes/ui/game_over_scoreboard.tscn")
 
 var _last_scene: Node = null
 var _pause_menu: Control = null
+var _game_over_screen: Control = null
 
 func _ready() -> void:
 	# Ensure we run even when paused and across scenes
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	# Hook centralized input toggles
-	InputManager.pause_toggled.connect(_toggle_pause)
+	
+	# Listen to game state events
+	EventBus.game_paused.connect(_on_game_paused)
+	EventBus.game_resumed.connect(_on_game_resumed)
+	EventBus.match_ended.connect(_on_match_ended)
 
 
 func _process(_delta: float) -> void:
@@ -22,10 +32,30 @@ func _process(_delta: float) -> void:
 		_ensure_dev_menu(cs)
 
 
-func _input(_event: InputEvent) -> void:
-	# Input handled centrally by InputManager; keep stub to avoid previous behavior
-	pass
+func _on_game_paused() -> void:
+	if not is_instance_valid(_pause_menu):
+		_pause_menu = PAUSE_MENU_SCENE.instantiate()
+		var root := get_tree().current_scene
+		var hud := root.get_node_or_null("HUD") if root else null
+		if hud:
+			hud.add_child(_pause_menu)
+		else:
+			root.add_child(_pause_menu)
+	
+	_pause_menu.visible = true
 
+func _on_game_resumed() -> void:
+	if is_instance_valid(_pause_menu):
+		_pause_menu.visible = false
+
+func _on_match_ended(winner: CharacterController) -> void:
+	# Clean up old game over screen if it exists
+	if is_instance_valid(_game_over_screen):
+		_game_over_screen.queue_free()
+	
+	_game_over_screen = GAME_OVER_SCENE.instantiate()
+	_game_over_screen.set_current_level(GameStateManager.current_level_path)
+	get_tree().root.add_child(_game_over_screen)
 
 func _ensure_hud(root: Node) -> void:
 	if root == null:
@@ -52,9 +82,8 @@ func _ensure_dev_menu(root: Node) -> void:
 			existing_release.queue_free()
 		return
 	
-	# Don't show dev menu in UI scenes (menus)
-	var scene_path := root.scene_file_path
-	if scene_path.begins_with("res://scenes/ui/"):
+	# Don't show dev menu in menu state
+	if GameStateManager.is_in_menu():
 		var existing := root.get_node_or_null("DevMenu")
 		if existing:
 			existing.queue_free()
@@ -65,39 +94,3 @@ func _ensure_dev_menu(root: Node) -> void:
 	var dev := DEV_MENU_SCENE.instantiate()
 	dev.name = "DevMenu"
 	root.add_child(dev)
-
-
-func _ensure_pause_menu() -> void:
-	if is_instance_valid(_pause_menu):
-		return
-	var instance := PAUSE_MENU_SCENE.instantiate()
-	var root := get_tree().current_scene
-	var hud := root.get_node_or_null("HUD") if root else null
-	if hud:
-		hud.add_child(instance)
-	else:
-		root.add_child(instance)
-	_pause_menu = instance as Control
-
-
-func _toggle_pause() -> void:
-	# Don't show pause menu in the start menu scene
-	var current_scene := get_tree().current_scene
-	if current_scene and current_scene.scene_file_path == "res://scenes/ui/start_menu.tscn":
-		return
-	
-	# Don't allow pause menu if game over is active
-	if get_tree().get_nodes_in_group("game_over_active").size() > 0:
-		return
-	
-	if get_tree().paused:
-		get_tree().paused = false
-		if is_instance_valid(_pause_menu):
-			_pause_menu.visible = false
-	else:
-		_ensure_pause_menu()
-		if is_instance_valid(_pause_menu):
-			_pause_menu.visible = true
-		get_tree().paused = true
-
-

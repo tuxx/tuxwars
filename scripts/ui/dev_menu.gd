@@ -1,7 +1,5 @@
 extends Control
 
-#const LEVEL_NAVIGATION := preload("res://scripts/level_navigation.gd")
-
 var desired_draw_graph := false
 var desired_draw_jump := false
 
@@ -37,6 +35,12 @@ func _ready() -> void:
 		_apply_toggle_states()
 	)
 	InputManager.debug_pause_toggled.connect(_toggle_debug_pause)
+	
+	# Listen to game state changes
+	EventBus.game_state_changed.connect(_on_game_state_changed)
+	
+	# Update visibility based on current state
+	_update_visibility_for_state()
 
 	# Full-rect root to let containers position panel at top-right with margins
 	set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -172,6 +176,14 @@ func _toggle_debug_pause() -> void:
 	get_tree().paused = not get_tree().paused
 	print("[Dev] Debug pause: ", "PAUSED" if get_tree().paused else "UNPAUSED")
 
+func _on_game_state_changed(_from_state: String, _to_state: String) -> void:
+	_update_visibility_for_state()
+
+func _update_visibility_for_state() -> void:
+	# Hide dev menu in menu state, show in gameplay
+	if not GameStateManager.can_show_dev_menu():
+		visible = false
+
 
 func reset_performance_stats() -> void:
 	# Reset frame time statistics (called when level loads/restarts)
@@ -191,7 +203,7 @@ func _update_frame_stats() -> void:
 	var sorted_times := frame_times.duplicate()
 	sorted_times.sort()
 	var median_ms: float = 0.0
-	var mid := sorted_times.size() / 2
+	var mid := int(sorted_times.size() / 2.0)
 	if sorted_times.size() % 2 == 0:
 		median_ms = (sorted_times[mid - 1] + sorted_times[mid]) / 2.0
 	else:
