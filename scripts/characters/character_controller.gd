@@ -1,7 +1,11 @@
 extends CharacterBody2D
 class_name CharacterController
 
-signal enemy_killed(victim: CharacterBody2D)
+## Handles character physics, movement, animation, and lifecycle.
+##
+## Manages player input or AI control, applies physics (gravity, movement),
+## handles spawn/respawn logic, and detects character-to-character collisions (stomps).
+## Characters can wrap around screen edges and have spawn protection on respawn.
 
 # Preload gravestone scene
 const GRAVESTONE_SCENE = preload("res://scenes/objects/gravestone.tscn")
@@ -31,6 +35,9 @@ const SPAWN_FADE_DURATION: float = 0.8
 const SPAWN_INITIAL_ALPHA: float = 0.0
 const SPAWN_SCALE_START: float = 0.3
 const SPAWN_SCALE_BOUNCE: float = 1.2
+const SPAWN_FLASH_BRIGHTNESS: float = 5.0
+const SPAWN_FLASH_SPEED_MULT: float = 4.0
+const SPAWN_BOUNCE_THRESHOLD: float = 0.6
 var spawn_animation_timer: float = 0.0
 
 # Animation
@@ -66,6 +73,9 @@ func _ready():
 	if is_player:
 		add_to_group("players")
 	
+	# Register with GameStateManager
+	GameStateManager.register_character(self)
+	
 	# Ensure characters render above temporary objects like gravestones
 	z_index = 10
 	
@@ -81,91 +91,25 @@ func _ready():
 	# Set initial facing toward screen center
 	_face_towards_screen_center()
 
-# Dynamically load sprite frames for a given character
+## Loads and applies cached sprite frames for the specified character.
 func load_character_animations(character_name: String) -> void:
 	if not animated_sprite:
 		return
 	
 	character_asset_name = character_name
 	
-	# Build paths to character spritesheets (try both plural and singular)
-	var base_path := "res://assets/characters/%s/spritesheets/" % character_name
-	var base_path_alt := "res://assets/characters/%s/spritesheet/" % character_name
-	
-	# Check which path exists
-	if not ResourceLoader.exists(base_path + "idle.png") and ResourceLoader.exists(base_path_alt + "idle.png"):
-		base_path = base_path_alt
-	
-	var idle_path := base_path + "idle.png"
-	var jump_path := base_path + "jump.png"
-	var run_path := base_path + "run.png"
-	
-	# Try to load textures
-	var idle_texture := _load_texture_safe(idle_path)
-	var jump_texture := _load_texture_safe(jump_path)
-	var run_texture := _load_texture_safe(run_path)
-	
-	# If no textures could be loaded, keep existing animations
-	if not idle_texture and not jump_texture and not run_texture:
+	# Get cached sprite frames from AnimationCache singleton
+	var frames := AnimationCache.get_sprite_frames(character_name)
+	if not frames:
 		push_warning("Could not load animations for character: %s" % character_name)
 		return
 	
-	# Create new SpriteFrames
-	var new_frames := SpriteFrames.new()
-	
-	# Add idle animation (2 frames, 32x32 each)
-	if idle_texture:
-		new_frames.add_animation("idle")
-		new_frames.set_animation_speed("idle", 4.0)
-		new_frames.set_animation_loop("idle", true)
-		var idle_frame_1 := AtlasTexture.new()
-		idle_frame_1.atlas = idle_texture
-		idle_frame_1.region = Rect2(0, 0, 32, 32)
-		new_frames.add_frame("idle", idle_frame_1, 1.0, 0)
-		var idle_frame_2 := AtlasTexture.new()
-		idle_frame_2.atlas = idle_texture
-		idle_frame_2.region = Rect2(32, 0, 32, 32)
-		new_frames.add_frame("idle", idle_frame_2, 1.0, 1)
-	
-	# Add jump animation (2 frames, 32x32 each)
-	if jump_texture:
-		new_frames.add_animation("jump")
-		new_frames.set_animation_speed("jump", 5.0)
-		new_frames.set_animation_loop("jump", true)
-		var jump_frame_1 := AtlasTexture.new()
-		jump_frame_1.atlas = jump_texture
-		jump_frame_1.region = Rect2(0, 0, 32, 32)
-		new_frames.add_frame("jump", jump_frame_1, 1.0, 0)
-		var jump_frame_2 := AtlasTexture.new()
-		jump_frame_2.atlas = jump_texture
-		jump_frame_2.region = Rect2(32, 0, 32, 32)
-		new_frames.add_frame("jump", jump_frame_2, 1.0, 1)
-	
-	# Add run animation (4 frames, 32x32 each)
-	if run_texture:
-		new_frames.add_animation("run")
-		new_frames.set_animation_speed("run", 8.0)
-		new_frames.set_animation_loop("run", true)
-		for i in range(4):
-			var run_frame := AtlasTexture.new()
-			run_frame.atlas = run_texture
-			run_frame.region = Rect2(i * 32, 0, 32, 32)
-			new_frames.add_frame("run", run_frame, 1.0, i)
-	
-	# Apply the new sprite frames
-	animated_sprite.sprite_frames = new_frames
+	# Apply the sprite frames
+	animated_sprite.sprite_frames = frames
 	
 	# Start with idle animation
-	if new_frames.has_animation("idle"):
+	if frames.has_animation("idle"):
 		animated_sprite.play("idle")
-
-func _load_texture_safe(path: String) -> Texture2D:
-	if not ResourceLoader.exists(path):
-		return null
-	var texture := load(path)
-	if texture is Texture2D:
-		return texture
-	return null
 
 func _physics_process(delta: float) -> void:
 	# Handle respawn timer
@@ -407,6 +351,7 @@ func _wrap_after_motion() -> void:
 		pos.y = bottom - wrap_offset
 	global_position = pos
 
+## Despawns character, spawns gravestone, and emits kill event.
 func despawn(killer: CharacterController = null) -> void:
 	if is_despawned:
 		return
@@ -416,7 +361,8 @@ func despawn(killer: CharacterController = null) -> void:
 	velocity = Vector2.ZERO
 	
 	if killer and killer != self:
-		killer.enemy_killed.emit(self)
+		# Emit through EventBus instead of direct signal
+		EventBus.character_killed.emit(killer, self)
 	
 	# Spawn gravestone at character position
 	_spawn_gravestone()
@@ -429,6 +375,7 @@ func despawn(killer: CharacterController = null) -> void:
 	if shape_alive:
 		shape_alive.disabled = true
 
+## Respawns character at spawn point with protection and visual effects.
 func _respawn() -> void:
 	is_despawned = false
 	respawn_timer = 0.0
@@ -451,7 +398,7 @@ func _respawn() -> void:
 	
 	# Initialize spawn visual effects
 	# Start with bright white flash, invisible, and small scale
-	modulate = Color(5.0, 5.0, 5.0, SPAWN_INITIAL_ALPHA)  # Bright white flash
+	modulate = Color(SPAWN_FLASH_BRIGHTNESS, SPAWN_FLASH_BRIGHTNESS, SPAWN_FLASH_BRIGHTNESS, SPAWN_INITIAL_ALPHA)
 	scale = Vector2(SPAWN_SCALE_START, SPAWN_SCALE_START)
 	
 	# Enable collision
@@ -468,18 +415,18 @@ func _update_spawn_animation() -> void:
 	var target_alpha: float = lerp(SPAWN_INITIAL_ALPHA, 1.0, progress)
 	
 	# Bright white flash fades quickly (back to normal color)
-	var flash_progress: float = min(progress * 4.0, 1.0)  # Flash fades 4x faster
-	var color_value: float = lerp(5.0, 1.0, flash_progress)
+	var flash_progress: float = min(progress * SPAWN_FLASH_SPEED_MULT, 1.0)
+	var color_value: float = lerp(SPAWN_FLASH_BRIGHTNESS, 1.0, flash_progress)
 	
 	# Scale with bounce effect using custom easing
 	var scale_value: float
-	if progress < 0.6:
+	if progress < SPAWN_BOUNCE_THRESHOLD:
 		# Grow from small to slightly larger than normal (bounce up)
-		var grow_progress := progress / 0.6
+		var grow_progress := progress / SPAWN_BOUNCE_THRESHOLD
 		scale_value = lerp(SPAWN_SCALE_START, SPAWN_SCALE_BOUNCE, _ease_out_back(grow_progress))
 	else:
 		# Settle back to normal size (bounce down)
-		var settle_progress := (progress - 0.6) / 0.4
+		var settle_progress := (progress - SPAWN_BOUNCE_THRESHOLD) / (1.0 - SPAWN_BOUNCE_THRESHOLD)
 		scale_value = lerp(SPAWN_SCALE_BOUNCE, 1.0, _ease_out_quad(settle_progress))
 	
 	# Apply the visual effects

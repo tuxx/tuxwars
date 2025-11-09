@@ -7,9 +7,6 @@ extends Control
 var _current_level_path: String = ""
 
 func _ready() -> void:
-	# Add to group so pause manager can check if we're active
-	add_to_group("game_over_active")
-	
 	_restart_button.pressed.connect(_on_restart_pressed)
 	_menu_button.pressed.connect(_on_menu_pressed)
 	_populate_scoreboard()
@@ -87,29 +84,10 @@ func _create_score_row(entry: Dictionary) -> HBoxContainer:
 	return row
 
 func _on_restart_pressed() -> void:
-	# Remove from group
-	remove_from_group("game_over_active")
-	
-	# Remove this menu immediately
 	queue_free()
-	
-	# Unpause before changing scene
-	get_tree().paused = false
-	
-	if _current_level_path != "":
-		get_tree().change_scene_to_file(_current_level_path)
-	else:
-		# Fallback to first level
-		get_tree().change_scene_to_file("res://scenes/levels/level01.tscn")
+	GameStateManager.restart_match()
 
 func _on_menu_pressed() -> void:
-	# Remove from group
-	remove_from_group("game_over_active")
-	
-	# Remove this menu immediately
 	queue_free()
-	
-	# Unpause before changing scene
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/ui/start_menu.tscn")
+	GameStateManager.return_to_menu()
 

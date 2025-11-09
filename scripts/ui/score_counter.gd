@@ -1,12 +1,17 @@
 extends Control
 class_name ScoreCounter
 
+## Tracks and displays kill scores for all characters.
+##
+## Creates UI entries for each character with portrait and score, listens to
+## character_killed events via EventBus, scales UI based on character count,
+## and triggers win condition when a character reaches the target score.
+
 const SCORE_ENTRY_SCENE := preload("res://scenes/ui/score_entry.tscn")
 const GAME_OVER_SCENE := preload("res://scenes/ui/game_over_scoreboard.tscn")
 const SCORE_FORMAT := "%d"
 const MAX_SCORE := 999
 const PORTRAIT_TARGET_SIZE := 28.0
-const PORTRAIT_TEXTURE_PATH := "res://assets/characters/%s/base-16x16.png"
 
 # Scaling thresholds based on character count
 const SCALE_NORMAL := 1.0      # 1-2 characters
@@ -23,6 +28,9 @@ func _ready() -> void:
 	add_to_group("score_counter")
 	call_deferred("_scan_existing_characters")
 	get_tree().node_added.connect(_on_node_added)
+	
+	# Listen to EventBus for character kills
+	EventBus.character_killed.connect(_on_character_killed_event)
 
 func _scan_existing_characters() -> void:
 	var characters: Array = []
@@ -50,7 +58,6 @@ func _register_character(character: CharacterController) -> void:
 	_entries_by_character[character] = entry
 	_update_entry_portrait(character, entry)
 	_update_entry_label(entry)
-	character.enemy_killed.connect(_on_character_enemy_killed.bind(character))
 	character.tree_exiting.connect(_on_character_tree_exiting.bind(character))
 	
 	# Update scale based on total character count
@@ -86,7 +93,7 @@ func _get_character_portrait_texture(character: CharacterController) -> Texture2
 	var asset_name := character.character_asset_name if character.character_asset_name else ""
 	if asset_name.is_empty():
 		return null
-	var path := PORTRAIT_TEXTURE_PATH % asset_name
+	var path := ResourcePaths.get_character_portrait_path(asset_name)
 	if _portrait_cache.has(path):
 		return _portrait_cache[path]
 	if not ResourceLoader.exists(path):
@@ -116,7 +123,7 @@ func _get_sprite_frame_texture(character: CharacterController) -> Texture2D:
 		return null
 	return frames.get_frame_texture(first_animation, 0)
 
-func _on_character_enemy_killed(_victim: CharacterBody2D, killer: CharacterController) -> void:
+func _on_character_killed_event(killer: CharacterController, _victim: CharacterController) -> void:
 	_add_score(killer, 1)
 
 func _add_score(character: CharacterController, amount: int) -> void:
@@ -170,36 +177,9 @@ func _update_scale() -> void:
 func _check_win_condition(character: CharacterController, score: int) -> void:
 	var kills_to_win := GameSettings.get_kills_to_win()
 	if score >= kills_to_win:
-		# Someone won! Show game over screen
-		call_deferred("_show_game_over")
+		# Someone won! Emit event for GameStateManager to handle
+		EventBus.win_condition_met.emit(character)
 
-func _show_game_over() -> void:
-	# Hide the score counter
-	hide()
-	
-	# Remove all characters from the scene
-	_remove_all_characters()
-	
-	# Pause the game
-	get_tree().paused = true
-	
-	# Create and show game over scoreboard
-	var game_over := GAME_OVER_SCENE.instantiate()
-	
-	# Get current level path
-	var current_scene := get_tree().current_scene
-	if current_scene:
-		game_over.set_current_level(current_scene.scene_file_path)
-	
-	# Add to scene tree (above pause menu layer)
-	get_tree().root.add_child(game_over)
-
-func _remove_all_characters() -> void:
-	# Get all characters and remove them
-	var characters := get_tree().get_nodes_in_group("characters")
-	for node in characters:
-		if is_instance_valid(node):
-			node.queue_free()
 
 func get_character_score(character: CharacterController) -> int:
 	if _entries_by_character.has(character):

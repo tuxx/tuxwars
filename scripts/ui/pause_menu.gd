@@ -24,14 +24,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _on_resume_pressed() -> void:
-	visible = false
-	get_tree().paused = false
+	GameStateManager.resume_game()
 
 
 func _on_new_game_pressed() -> void:
-	# Unpause and return to the main menu
-	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/ui/start_menu.tscn")
+	GameStateManager.return_to_menu()
 
 
 func _on_visibility_changed() -> void:

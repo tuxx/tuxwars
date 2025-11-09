@@ -96,45 +96,17 @@ func _setup_popups() -> void:
 	_setup_cpu_select_popup()
 
 func _setup_character_select_popup() -> void:
-	# Load character previews
-	var tux_preview: TextureRect = _character_select_popup.get_node("%TuxPreview")
-	var beasty_preview: TextureRect = _character_select_popup.get_node("%BeastyPreview")
-	var gopher_preview: TextureRect = _character_select_popup.get_node("%GopherPreview")
-	
-	tux_preview.texture = _load_character_idle_frame("tux")
-	beasty_preview.texture = _load_character_idle_frame("beasty")
-	gopher_preview.texture = _load_character_idle_frame("gopher")
-	
-	# Connect buttons
-	var tux_btn: Button = _character_select_popup.get_node("%TuxButton")
-	var beasty_btn: Button = _character_select_popup.get_node("%BeastyButton")
-	var gopher_btn: Button = _character_select_popup.get_node("%GopherButton")
-	
-	tux_btn.pressed.connect(_on_player_character_selected.bind("tux"))
-	beasty_btn.pressed.connect(_on_player_character_selected.bind("beasty"))
-	gopher_btn.pressed.connect(_on_player_character_selected.bind("gopher"))
-	
-	# Update button states based on selection
+	_setup_character_popup_common(
+		_character_select_popup,
+		_on_player_character_selected
+	)
 	_update_character_select_buttons()
 
 func _setup_cpu_select_popup() -> void:
-	# Load character previews
-	var tux_preview: TextureRect = _cpu_select_popup.get_node("%TuxPreview")
-	var beasty_preview: TextureRect = _cpu_select_popup.get_node("%BeastyPreview")
-	var gopher_preview: TextureRect = _cpu_select_popup.get_node("%GopherPreview")
-	
-	tux_preview.texture = _load_character_idle_frame("tux")
-	beasty_preview.texture = _load_character_idle_frame("beasty")
-	gopher_preview.texture = _load_character_idle_frame("gopher")
-	
-	# Connect character buttons
-	var tux_btn: Button = _cpu_select_popup.get_node("%TuxButton")
-	var beasty_btn: Button = _cpu_select_popup.get_node("%BeastyButton")
-	var gopher_btn: Button = _cpu_select_popup.get_node("%GopherButton")
-	
-	tux_btn.pressed.connect(_on_cpu_character_selected.bind("tux"))
-	beasty_btn.pressed.connect(_on_cpu_character_selected.bind("beasty"))
-	gopher_btn.pressed.connect(_on_cpu_character_selected.bind("gopher"))
+	_setup_character_popup_common(
+		_cpu_select_popup,
+		_on_cpu_character_selected
+	)
 	
 	# Connect count buttons
 	var minus_btn: Button = _cpu_select_popup.get_node("%MinusButton")
@@ -147,6 +119,21 @@ func _setup_cpu_select_popup() -> void:
 	_update_cpu_select_buttons()
 	_update_cpu_count_display()
 
+func _setup_character_popup_common(popup: AcceptDialog, on_select_callback: Callable) -> void:
+	# Generic setup for character selection popups
+	for char_name in GameSettings.AVAILABLE_CHARACTERS:
+		var preview_name := "%s%sPreview" % [char_name.capitalize(), ""]
+		var button_name := "%s%sButton" % [char_name.capitalize(), ""]
+		
+		var preview: TextureRect = popup.get_node("%" + preview_name)
+		var button: Button = popup.get_node("%" + button_name)
+		
+		if preview:
+			preview.texture = _load_character_idle_frame(char_name)
+		
+		if button:
+			button.pressed.connect(on_select_callback.bind(char_name))
+
 func _on_new_game_pressed() -> void:
 	# Load the selected level
 	var level_to_load: String = ""
@@ -155,10 +142,10 @@ func _on_new_game_pressed() -> void:
 	elif _level_paths.size() > 0:
 		level_to_load = _level_paths[0]
 	else:
-		level_to_load = "res://scenes/levels/level01.tscn"
+		level_to_load = ResourcePaths.SCENE_LEVEL_01
 	
 	if level_to_load != "":
-		get_tree().change_scene_to_file(level_to_load)
+		GameStateManager.start_match(level_to_load)
 
 func _on_prev_level_pressed() -> void:
 	if _level_paths.size() == 0:
@@ -250,8 +237,8 @@ func _update_cpu_count_display() -> void:
 func _populate_levels() -> void:
 	_level_paths.clear()
 	_log("Populate levels started.")
-	var dir_path := "res://scenes/levels"
-	var thumbs_path := "res://assets/level_thumbs"
+	var dir_path := ResourcePaths.LEVELS_DIR
+	var thumbs_path := ResourcePaths.LEVEL_THUMBS_DIR
 	
 	# Check which levels have thumbnails (more reliable for web builds)
 	_log("Checking for level thumbnails...")
@@ -381,8 +368,8 @@ func _fallback_display_name_from_path(level_path: String) -> String:
 func _load_character_idle_frame(character_name: String) -> Texture2D:
 	# Try both plural and singular spritesheet folder names
 	var paths := [
-		"res://assets/characters/%s/spritesheets/idle.png" % character_name,
-		"res://assets/characters/%s/spritesheet/idle.png" % character_name
+		ResourcePaths.get_character_spritesheet_path(character_name) + ResourcePaths.CHARACTER_IDLE_SPRITE,
+		ResourcePaths.get_character_spritesheet_alt_path(character_name) + ResourcePaths.CHARACTER_IDLE_SPRITE
 	]
 	
 	for path in paths:
