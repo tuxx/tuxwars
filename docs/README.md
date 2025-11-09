@@ -1,0 +1,88 @@
+# Super Tux War Documentation
+
+Welcome to the Super Tux War documentation! This is a comprehensive guide for developers, level designers, and contributors.
+
+## 📚 Documentation Sections
+
+### [Level Design](level-design/README.md)
+Complete guide to creating and designing levels for Super Tux War.
+
+- **[Getting Started](level-design/getting-started.md)** - Create your first level
+- **[Tile Layers & Block Types](level-design/tile-layers.md)** - Understanding the tile system
+- **[Spawn Points](level-design/spawn-points.md)** - Character spawning system
+- **[Level Thumbnails](level-design/level-thumbnails.md)** - Automatic thumbnail generation
+- **[Navigation Graph](level-design/navigation-graph.md)** - AI pathfinding system
+
+### [Contributing Guide](CONTRIBUTING.md)
+How to contribute code, assets, documentation, and more. Includes list of needed assets.
+
+### [Roadmap](ROADMAP.md)
+Feature roadmap and development priorities (multiplayer, sound system, game modes, etc.).
+
+### Character System *(coming soon)*
+How to add new characters, animations, and customize behavior.
+
+### Core Systems *(coming soon)*
+Deep dive into event bus, game state, input management, and more.
+
+## 🎮 Quick Links
+
+- [Main README](../README.md) - Project overview and game design
+- [Play in Browser](https://tuxx.github.io/super-tux-war/)
+- [Godot 4.5.1 Documentation](https://docs.godotengine.org/en/4.5/)
+
+## 📖 About This Documentation
+
+This documentation is maintained alongside the code in the `docs/` folder. When making code changes, please update the relevant documentation to keep everything in sync.
+
+### Documentation Standards
+
+- Use clear, concise language
+- Include code examples where relevant
+- Add screenshots/diagrams when helpful
+- Keep file paths relative to project root
+- Follow markdown best practices
+
+## 🔧 Technical Overview
+
+### Project Structure
+
+```
+super-tux-wars/
+├── assets/          # Sprites, tiles, audio
+├── scenes/          # Scene files (.tscn)
+├── scripts/         # GDScript code
+│   ├── characters/  # Player & NPC logic
+│   ├── core/        # Core systems
+│   ├── levels/      # Level management
+│   ├── objects/     # Interactive objects
+│   └── ui/          # User interface
+├── addons/          # Editor plugins
+└── docs/            # This documentation
+```
+
+### Core Constants
+
+The game uses **32×32 pixel tiles** and physics constants defined in `GameConstants`:
+
+- **Tile Size**: 32px
+- **Gravity**: 1440 px/s²
+- **Jump Velocity**: -540 px/s
+- **Max Walk Speed**: 240 px/s
+- **Max Run Speed**: 330 px/s
+
+See [game_constants.gd](../scripts/core/game_constants.gd) for complete values.
+
+## 🤝 Contributing to Documentation
+
+Found a mistake or want to improve the docs? Contributions are welcome!
+
+1. Edit markdown files in the `docs/` folder
+2. Test that links work correctly
+3. Submit a PR with your changes
+
+---
+
+**Version**: Godot 4.5.1  
+**Last Updated**: 2025-11-09
+
