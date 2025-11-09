@@ -61,6 +61,8 @@ func _ready() -> void:
 		container.visible = false
 		if not btn.pressed.is_connected(_on_card_pressed.bind(btn)):
 			btn.pressed.connect(_on_card_pressed.bind(btn))
+		if not btn.gui_input.is_connected(_on_card_gui_input.bind(i)):
+			btn.gui_input.connect(_on_card_gui_input.bind(i))
 	_log("Connected button signals.")
 	call_deferred("_populate_levels")
 
@@ -97,11 +99,11 @@ func _populate_levels() -> void:
 		_log("DirAccess.open(%s) -> %s" % [dir_path, str(dir != null)])
 		if dir:
 			dir.list_dir_begin()
-			var name := dir.get_next()
-			while name != "":
+			var entry_name := dir.get_next()
+			while entry_name != "":
 				if not dir.current_is_dir():
-					files.append(name)
-				name = dir.get_next()
+					files.append(entry_name)
+				entry_name = dir.get_next()
 			dir.list_dir_end()
 		_log("DirAccess iteration -> %d entries" % files.size())
 	# Final fallback: probe known levelXX.tscn names
@@ -147,7 +149,7 @@ func _populate_levels() -> void:
 		_card_buttons[i].tooltip_text = _card_labels[i].text
 		_card_buttons[i].disabled = false
 		_log("Showing placeholder for %s" % _level_paths[i])
-		await _fill_card(i, _level_paths[i])
+		_fill_card(i, _level_paths[i])
 	if to_show == 0:
 		_log("No levels to show. Check export includes or directory listing on Web.")
 
@@ -208,6 +210,17 @@ func _on_card_pressed(button: Button) -> void:
 			_selected_level_index = i
 			_update_card_selection()
 			break
+
+func _on_card_gui_input(event: InputEvent, card_index: int) -> void:
+	# Detect double-click to launch level directly
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.pressed and mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.double_click:
+			# Double-click detected - launch the level
+			if card_index >= 0 and card_index < _level_paths.size():
+				var level_to_load := _level_paths[card_index]
+				_log("Double-click detected on card %d, launching %s" % [card_index, level_to_load])
+				get_tree().change_scene_to_file(level_to_load)
 
 func _update_card_selection() -> void:
 	# Update visual feedback for selected card (show/hide border)
