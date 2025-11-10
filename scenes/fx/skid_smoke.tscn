@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://skidsmoke"]
+
+[sub_resource type="Curve" id="2"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.2, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+
+[sub_resource type="ParticleProcessMaterial" id="1"]
+lifetime = 0.3
+preprocess = 0.1
+direction = Vector3(0, -1, 0)
+spread = 0.6
+gravity = Vector3(0, 360, 0)
+initial_velocity_min = 80.0
+initial_velocity_max = 140.0
+initial_velocity_random = 0.35
+scale_min = 0.4
+scale_max = 0.8
+color = Color(1, 1, 1, 0.55)
+alpha_curve = SubResource("2")
+
+[node name="SkidSmoke" type="GPUParticles2D"]
+amount = 24
+lifetime = 0.35
+one_shot = false
+preprocess = 0.1
+explosiveness = 0.2
+randomness = 0.4
+emitting = false
+visibility_rect = Rect2(-40, -32, 80, 64)
+process_material = SubResource("1")

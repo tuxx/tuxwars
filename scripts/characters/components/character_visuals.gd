@@ -20,6 +20,8 @@ const SKID_MIN_SPEED_RATIO := 0.95
 const SKID_INPUT_THRESHOLD := 0.4
 var _skid_active := false
 var _skid_target_direction := 0
+const SKID_SMOKE_SCENE := preload("res://scenes/fx/skid_smoke.tscn")
+var _skid_smoke_particles: GPUParticles2D = null
 
 func _init(character_body: CharacterBody2D) -> void:
 	character = character_body
@@ -105,6 +107,7 @@ func _update_skid_state(
 		var has_input := absf(input_direction) >= SKID_INPUT_THRESHOLD
 		if not is_on_floor or not has_input or velocity_dir == _skid_target_direction or velocity_dir == 0:
 			_skid_active = false
+			_stop_skid_smoke()
 		else:
 			_play_skid_animation(_skid_target_direction)
 			return true
@@ -115,6 +118,7 @@ func _update_skid_state(
 		_play_skid_animation(_skid_target_direction)
 		return true
 	
+	_stop_skid_smoke()
 	return false
 
 
@@ -152,6 +156,41 @@ func _play_skid_animation(target_direction: int) -> void:
 	
 	if target_direction != 0:
 		animated_sprite.flip_h = target_direction < 0
+	_start_skid_smoke(target_direction)
+
+func _ensure_skid_smoke() -> void:
+	if _skid_smoke_particles and is_instance_valid(_skid_smoke_particles):
+		return
+	if SKID_SMOKE_SCENE == null:
+		return
+	var particles := SKID_SMOKE_SCENE.instantiate()
+	if particles is GPUParticles2D:
+		_skid_smoke_particles = particles
+		_skid_smoke_particles.name = "SkidSmoke"
+		_skid_smoke_particles.visible = true
+		_skid_smoke_particles.emitting = false
+		_skid_smoke_particles.position = Vector2(0, 16)
+		_skid_smoke_particles.z_index = character.z_index - 1
+		character.add_child(_skid_smoke_particles)
+
+
+func _start_skid_smoke(direction: int) -> void:
+	_ensure_skid_smoke()
+	if _skid_smoke_particles == null or not is_instance_valid(_skid_smoke_particles):
+		return
+	var offset := Vector2(0, 16)
+	if direction != 0:
+		offset.x = -12.0 * float(direction)
+		_skid_smoke_particles.scale.x = -1.0 if direction < 0 else 1.0
+	else:
+		_skid_smoke_particles.scale.x = 1.0
+	_skid_smoke_particles.position = offset
+	_skid_smoke_particles.emitting = true
+
+
+func _stop_skid_smoke() -> void:
+	if _skid_smoke_particles and is_instance_valid(_skid_smoke_particles):
+		_skid_smoke_particles.emitting = false
 
 ## Starts spawn animation effects.
 func start_spawn_animation() -> void:
