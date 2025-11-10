@@ -13,7 +13,7 @@ config_version=5
 config/name="Super Tux War"
 run/main_scene="res://scenes/ui/start_menu.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://eq3yhwm1sl88"
 
 [autoload]
 
