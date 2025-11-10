@@ -22,4 +22,4 @@ localcrap/
 build/
 
 # Dev launch config
-dev_launch.cfg
+dev_launch.*
