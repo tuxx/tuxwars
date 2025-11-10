@@ -202,6 +202,7 @@ func _update_movement(delta: float) -> void:
 - `idle` - Standing still (4-8 frames)
 - `run` - Running (4-8 frames)
 - `jump` - Jumping (1-2 frames)
+- `skid` - Quick-stop pose (1 frame)
 
 **Frame Rate**: 4-8 fps for idle, 8 fps for run
 
@@ -316,6 +317,8 @@ Current characters need improvement or new characters needed:
   - Better pixel art quality
   - More expressive animations
   - Consistent with Tux style
+- **Tux** (Linux penguin) - Base sprite is serviceable but needs shading cleanup and snappier animation timing
+- **Go Gopher** (Go mascot) - Existing sprite feels flat; needs stronger silhouette, shading, and animation polish
 
 **New Characters Needed**:
 - **OpenBSD Fish** (Puffy) - Pufferfish mascot
@@ -323,13 +326,13 @@ Current characters need improvement or new characters needed:
 - **GNU** (GNU Head) - Wildebeest mascot
 - **Rust** (Ferris) - Crab mascot
 - **Python** - Snake mascot
-- **Go** (Gopher) - Currently exists but needs improvement
 - **Other open-source mascots** - Suggest your favorites!
 
 **Requirements for Each Character**:
 - Idle animation (4-8 frames)
 - Run animation (4-8 frames)
 - Jump sprite (1-2 frames)
+- Skid sprite (1 frame) for quick-stop animation beats
 - Fits within 32×32 tile footprint
 - Consistent pixel art style
 
@@ -500,4 +503,3 @@ Contributors will be recognized in:
 - Release notes for significant contributions
 
 Thank you for contributing to Super Tux War! 🎮🐧
-
