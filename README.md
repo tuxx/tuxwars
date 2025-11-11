@@ -22,6 +22,7 @@ A fan-inspired arena platformer built with Godot 4, following Super Mario War co
 *Controls*
 - Move: A/D or Left/Right
 - Jump: Space or W
+- Turbo: Shift
 - Drop through platforms: S+Space (Down+Jump)
 
 ---
@@ -50,6 +51,10 @@ We welcome contributions! See **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** for de
 - See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for what we need (assets, features, etc.)
 
 By contributing, you agree to license your work under the MIT License.
+
+## Community
+
+- Discord: [Super Tux War](https://discord.gg/J8eEp6dsHx)
 
 ## Acknowledgements
 - Inspired by community-made arena platformers like Super Mario War.
