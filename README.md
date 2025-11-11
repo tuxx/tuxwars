@@ -10,8 +10,7 @@ A fan-inspired arena platformer built with Godot 4, following Super Mario War co
 
 ---
 
-<img width="1278" height="704" src="https://github.com/user-attachments/assets/728ad65c-ea4e-4b1b-aeba-768ae85eae55" />
-
+<img width="1279" height="702" src="https://github.com/user-attachments/assets/b07f63f8-b7ee-4b71-bed7-0c073830479a" />
 
 
 *Current tile map test level with 7 cpu players*
