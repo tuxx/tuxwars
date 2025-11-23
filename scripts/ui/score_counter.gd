@@ -78,7 +78,7 @@ func _update_entry_portrait(character: CharacterController, entry: Dictionary) -
 	var portrait: TextureRect = entry.get("portrait")
 	if portrait == null or character == null:
 		return
-	var texture: Texture2D = _get_character_portrait_texture(character)
+	var texture: Texture2D = _get_idle_frame_texture(character)
 	if texture == null:
 		texture = _get_sprite_frame_texture(character)
 	if texture:
@@ -87,23 +87,38 @@ func _update_entry_portrait(character: CharacterController, entry: Dictionary) -
 	# Apply character's color tint to the portrait
 	portrait.modulate = character.character_color
 
-func _get_character_portrait_texture(character: CharacterController) -> Texture2D:
+func _get_idle_frame_texture(character: CharacterController) -> Texture2D:
 	if character == null:
 		return null
 	var asset_name := character.character_asset_name if character.character_asset_name else ""
 	if asset_name.is_empty():
-		return null
-	var path := ResourcePaths.get_character_portrait_path(asset_name)
-	if _portrait_cache.has(path):
-		return _portrait_cache[path]
-	if not ResourceLoader.exists(path):
-		_portrait_cache[path] = null
-		return null
-	var texture := load(path)
-	if texture is Texture2D:
-		_portrait_cache[path] = texture
-		return texture
-	_portrait_cache[path] = null
+		asset_name = ""
+
+	# Prefer loading from the character's idle spritesheet to avoid stale in-tree frames
+	if asset_name != "":
+		var paths := [
+			ResourcePaths.get_character_spritesheet_path(asset_name) + ResourcePaths.CHARACTER_IDLE_SPRITE,
+			ResourcePaths.get_character_spritesheet_alt_path(asset_name) + ResourcePaths.CHARACTER_IDLE_SPRITE
+		]
+		for path in paths:
+			if _portrait_cache.has(path):
+				return _portrait_cache[path]
+			if ResourceLoader.exists(path):
+				var full_texture := load(path) as Texture2D
+				if full_texture:
+					var atlas := AtlasTexture.new()
+					atlas.atlas = full_texture
+					atlas.region = Rect2(0, 0, 32, 32)
+					_portrait_cache[path] = atlas
+					return atlas
+			_portrait_cache[path] = null
+	
+	# Fallback to the live AnimatedSprite2D idle frame (if already swapped)
+	var sprite := character.get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if sprite and sprite.sprite_frames and sprite.sprite_frames.has_animation("idle"):
+		if sprite.sprite_frames.get_frame_count("idle") > 0:
+			return sprite.sprite_frames.get_frame_texture("idle", 0)
+	
 	return null
 
 func _get_sprite_frame_texture(character: CharacterController) -> Texture2D:

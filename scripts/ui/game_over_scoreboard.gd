@@ -33,7 +33,8 @@ func _populate_scoreboard() -> void:
 				"character": character,
 				"score": score,
 				"name": GameSettings.get_character_display_name(character.character_asset_name),
-				"is_player": character.is_player
+				"is_player": character.is_player,
+				"color": character.character_color
 			})
 	
 	# Sort by score (highest first)
@@ -54,6 +55,13 @@ func _get_character_score(character: CharacterController) -> int:
 func _create_score_row(entry: Dictionary) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
+
+	# Color swatch to represent character tint (CPU colors, etc.)
+	var swatch := ColorRect.new()
+	swatch.custom_minimum_size = Vector2(18, 18)
+	swatch.color = entry.get("color", Color.WHITE)
+	swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(swatch)
 	
 	# Kills
 	var kills_label := Label.new()
@@ -70,6 +78,7 @@ func _create_score_row(entry: Dictionary) -> HBoxContainer:
 	name_label.text = entry.name
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.add_theme_font_size_override("font_size", 16)
+	name_label.add_theme_color_override("font_color", entry.get("color", Color.WHITE))
 	row.add_child(name_label)
 	
 	# Player indicator (Player or CPU text)
@@ -90,4 +99,3 @@ func _on_restart_pressed() -> void:
 func _on_menu_pressed() -> void:
 	queue_free()
 	GameStateManager.return_to_menu()
-

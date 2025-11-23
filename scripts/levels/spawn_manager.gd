@@ -67,6 +67,8 @@ func _initial_spawn() -> void:
 		var player := PLAYER_SCENE.instantiate()
 		# Set position BEFORE adding to scene tree (so _ready() sees correct position)
 		player.global_position = player_point.global_position
+		player.character_asset_name = player_character
+		# Player stays white by default; set other per-role colors here if needed
 		occupied_positions.append(player_point.global_position)
 		get_parent().add_child(player)
 		
@@ -87,6 +89,14 @@ func _initial_spawn() -> void:
 			var npc := NPC_SCENE.instantiate()
 			# Set position BEFORE adding to scene tree (so _ready() sees correct position)
 			npc.global_position = npc_point.global_position
+			npc.character_asset_name = cpu_character
+			# Assign unique color before the node enters the tree so HUD/UI pick it up
+			var color_index := i % CPU_COLORS.size()
+			var tint: Color = CPU_COLORS[color_index]
+			npc.character_color = tint
+			var sprite_pre := npc.get_node_or_null("AnimatedSprite2D")
+			if sprite_pre:
+				sprite_pre.modulate = tint
 			occupied_positions.append(npc_point.global_position)
 			get_parent().add_child(npc)
 			
@@ -94,14 +104,10 @@ func _initial_spawn() -> void:
 			if npc.has_method("load_character_animations"):
 				npc.load_character_animations(cpu_character)
 			
-			# Assign unique color to each CPU (cycles through palette)
-			var color_index := i % CPU_COLORS.size()
-			npc.character_color = CPU_COLORS[color_index]
-			
-			# Apply modulate to tint the sprite
+			# Ensure tint persists after animation load
 			var sprite := npc.get_node_or_null("AnimatedSprite2D")
 			if sprite:
-				sprite.modulate = CPU_COLORS[color_index]
+				sprite.modulate = tint
 			
 			_last_point_by_id[npc.get_instance_id()] = npc_point
 			last_point = npc_point

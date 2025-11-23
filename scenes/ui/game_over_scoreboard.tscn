@@ -65,6 +65,13 @@ theme_override_constants/separation = 5
 layout_mode = 2
 theme_override_constants/separation = 10
 
+[node name="ColorHeader" type="Label" parent="PanelContainer/VBox/ScrollContainer/ScoreTable/TableHeader"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = " "
+horizontal_alignment = 1
+
 [node name="KillsHeader" type="Label" parent="PanelContainer/VBox/ScrollContainer/ScoreTable/TableHeader"]
 custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
@@ -108,4 +115,3 @@ custom_minimum_size = Vector2(140, 50)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Main Menu"
-

@@ -188,6 +188,8 @@ func _update_movement(delta: float) -> void:
 - **Attribution**: Include attribution if required by license
 - **Format**: Use standard formats (PNG for images, OGG for audio)
 - **Style**: Consistent pixel art style, no filtering/antialiasing
+- **Color Palette**: All sprites and tiles must use the **Famicube color palette**
+- **Color Limit**: Maximum **4 colors per sprite or tile** (transparency does not count as a color, so sprites get full 4 colors)
 
 ### Sprites
 
@@ -196,6 +198,7 @@ func _update_movement(delta: float) -> void:
 - Collision ~30×30 px (slightly smaller than tile)
 - Pixel art style, no filtering
 - PNG format with transparency
+- Must use Famicube color palette with max 4 colors (transparency doesn't count)
 - Organize in `assets/characters/[name]/spritesheets/`
 
 **Required Animations**:
@@ -222,6 +225,7 @@ assets/characters/tux/
 - Exactly **32×32 pixels** (strict requirement)
 - Pixel art style
 - PNG format
+- Must use Famicube color palette with max 4 colors per tile
 - Clear visual distinction between types (solid, semisolid, hazards)
 
 **Organize by Type**:
