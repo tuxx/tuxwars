@@ -19,7 +19,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 	if event.is_pressed() and not event.is_echo():
-		if Input.is_action_pressed("ui_cancel") or Input.is_action_pressed("pause"):
+		# Only handle ui_cancel if it's NOT the same key as pause
+		# (InputManager handles 'pause' globally)
+		if event.is_action_pressed("ui_cancel") and not event.is_action_pressed("pause"):
 			_on_resume_pressed()
 
 
