@@ -1,0 +1,54 @@
+[gd_scene load_steps=6 format=4 uid="uid://dee21b7i40058"]
+
+[ext_resource type="Script" uid="uid://b0h4fj6ipj5ur" path="res://scripts/levels/level_navigation.gd" id="1_tk052"]
+[ext_resource type="TileSet" uid="uid://bd71pjju517dp" path="res://assets/tilesets/smw_blocks.tres" id="2_qnd2q"]
+[ext_resource type="Script" uid="uid://by6omvr8nj0ce" path="res://scripts/levels/spawn_manager.gd" id="3_vci13"]
+[ext_resource type="PackedScene" path="res://scenes/objects/spawn_point.tscn" id="4_vgpa5"]
+[ext_resource type="Script" uid="uid://dw1lahbxqubo2" path="res://scripts/levels/level_info.gd" id="5_emvoc"]
+
+[node name="TileMapLevel" type="Node2D"]
+script = ExtResource("1_tk052")
+
+[node name="DecorationTileMap" type="TileMapLayer" parent="."]
+z_index = -10
+tile_set = ExtResource("2_qnd2q")
+
+[node name="GroundTileMap" type="TileMapLayer" parent="."]
+tile_map_data = PackedByteArray("AAAAABUAAwAAAAAAAAABABUAAwAAAAAAAAACABUAAwAAAAAAAAADABUAAwAAAAAAAAAEABUAAwAAAAAAAAAFABUAAwAAAAAAAAAGABUAAwAAAAAAAAAHABUAAwAAAAAAAAAIABUAAwAAAAAAAAAJABUAAwAAAAAAAAAKABUAAwAAAAAAAAALABUAAwAAAAAAAAAMABUAAwAAAAAAAAANABUAAwAAAAAAAAAOABUAAwAAAAAAAAAPABUAAwAAAAAAAAAQABUAAwAAAAAAAAARABUAAwAAAAAAAAASABUAAwAAAAAAAAATABUAAwAAAAAAAAAUABUAAwAAAAAAAAAVABUAAwAAAAAAAAAWABUAAwAAAAAAAAAXABUAAwAAAAAAAAAYABUAAwAAAAAAAAAZABUAAwAAAAAAAAAaABUAAwAAAAAAAAAbABUAAwAAAAAAAAAcABUAAwAAAAAAAAAdABUAAwAAAAAAAAAeABUAAwAAAAAAAAAfABUAAwAAAAAAAAAgABUAAwAAAAAAAAAhABUAAwAAAAAAAAAiABUAAwAAAAAAAAAjABUAAwAAAAAAAAAkABUAAwAAAAAAAAAlABUAAwAAAAAAAAAmABUAAwAAAAAAAAAnABUAAwAAAAAAAAAnAAAAAwAAAAAAAAAmAAAAAwAAAAAAAAAlAAAAAwAAAAAAAAAkAAAAAwAAAAAAAAAjAAAAAwAAAAAAAAAiAAAAAwAAAAAAAAAhAAAAAwAAAAAAAAAgAAAAAwAAAAAAAAAfAAAAAwAAAAAAAAAeAAAAAwAAAAAAAAAdAAAAAwAAAAAAAAAcAAAAAwAAAAAAAAAbAAAAAwAAAAAAAAAaAAAAAwAAAAAAAAAZAAAAAwAAAAAAAAAYAAAAAwAAAAAAAAAXAAAAAwAAAAAAAAAWAAAAAwAAAAAAAAAVAAAAAwAAAAAAAAAUAAAAAwAAAAAAAAATAAAAAwAAAAAAAAASAAAAAwAAAAAAAAARAAAAAwAAAAAAAAAQAAAAAwAAAAAAAAAPAAAAAwAAAAAAAAAOAAAAAwAAAAAAAAANAAAAAwAAAAAAAAAMAAAAAwAAAAAAAAALAAAAAwAAAAAAAAAKAAAAAwAAAAAAAAAJAAAAAwAAAAAAAAAIAAAAAwAAAAAAAAAHAAAAAwAAAAAAAAAGAAAAAwAAAAAAAAAFAAAAAwAAAAAAAAAEAAAAAwAAAAAAAAADAAAAAwAAAAAAAAACAAAAAwAAAAAAAAABAAAAAwAAAAAAAAAAAAAAAwAAAAAAAAAAAAUAAwAAAAAAAAABAAUAAwAAAAAAAAACAAUAAwAAAAAAAAADAAUAAwAAAAAAAAAkAAUAAwAAAAAAAAAlAAUAAwAAAAAAAAAmAAUAAwAAAAAAAAAnAAUAAwAAAAAAAAAFAAgAAwAAAAAAAAAGAAgAAwAAAAAAAAAHAAgAAwAAAAAAAAAIAAgAAwAAAAAAAAALAAoAAwAAAAAAAAAMAAoAAwAAAAAAAAANAAoAAwAAAAAAAAAOAAoAAwAAAAAAAAAiAAgAAwAAAAAAAAAhAAgAAwAAAAAAAAAgAAgAAwAAAAAAAAAfAAgAAwAAAAAAAAAcAAoAAwAAAAAAAAAbAAoAAwAAAAAAAAAaAAoAAwAAAAAAAAAZAAoAAwAAAAAAAAAOAA8AAwAAAAAAAAANAA8AAwAAAAAAAAAMAA8AAwAAAAAAAAALAA8AAwAAAAAAAAAIABEAAwAAAAAAAAAHABEAAwAAAAAAAAAGABEAAwAAAAAAAAAFABEAAwAAAAAAAAAEABEAAwAAAAAAAAAZAA8AAwAAAAAAAAAaAA8AAwAAAAAAAAAbAA8AAwAAAAAAAAAcAA8AAwAAAAAAAAAWAA0AAwAAAAAAAAAVAA0AAwAAAAAAAAAUAA0AAwAAAAAAAAATAA0AAwAAAAAAAAASAA0AAwAAAAAAAAARAA0AAwAAAAAAAAAfABEAAwAAAAAAAAAgABEAAwAAAAAAAAAhABEAAwAAAAAAAAAiABEAAwAAAAAAAAAjABEAAwAAAAAAAAAkABIAAwAAAAAAAAADABIAAwAAAAAAAAA=")
+tile_set = ExtResource("2_qnd2q")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="SemisolidTileMap" type="TileMapLayer" parent="."]
+tile_set = ExtResource("2_qnd2q")
+
+[node name="SpawnManager" type="Node" parent="."]
+script = ExtResource("3_vci13")
+
+[node name="SpawnPoint" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(71, 186)
+
+[node name="SpawnPoint2" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(1220, 181)
+
+[node name="SpawnPoint3" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(32, 639)
+
+[node name="SpawnPoint4" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(1237, 640)
+
+[node name="SpawnPoint5" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(411, 480)
+
+[node name="SpawnPoint6" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(835, 471)
+
+[node name="SpawnPoint7" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(816, 199)
+
+[node name="SpawnPoint8" parent="SpawnManager" instance=ExtResource("4_vgpa5")]
+position = Vector2(417, 188)
+
+[node name="LevelInfo" type="Node" parent="."]
+script = ExtResource("5_emvoc")
+level_name = "Ice Paradise"

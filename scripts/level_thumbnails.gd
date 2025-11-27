@@ -9,6 +9,7 @@ class_name LevelThumbnails
 const THUMBNAILS := {
 	"level01": preload("res://assets/level_thumbs/level01.png"),
 	"level02": preload("res://assets/level_thumbs/level02.png"),
+	"level03": preload("res://assets/level_thumbs/level03.png"),
 }
 
 ## Get thumbnail for a level path
